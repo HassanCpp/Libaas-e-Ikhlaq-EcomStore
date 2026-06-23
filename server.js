@@ -60,7 +60,7 @@ app.use(session({
     secret: process.env.SESSION_SECRET || 'libaseikhlaq_super_secret_key_2026', 
     resave: false,
     saveUninitialized: false,
-    store: new MongoStore({ url: dbUri }), 
+    store: new MongoStore({ mongooseConnection: mongoose.connection }), 
     cookie: { 
         maxAge: 1000 * 60 * 60 * 24,
         httpOnly: true,
