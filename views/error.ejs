@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error | Libas-e-Ikhlaq</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #f7f7f7;
+            color: #222222;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .error-container {
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.08);
+            max-width: 560px;
+            width: 100%;
+            padding: 60px 40px;
+            text-align: center;
+        }
+
+        .error-icon {
+            width: 80px;
+            height: 80px;
+            background: #FFF0EB;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 28px;
+        }
+
+        .error-icon svg {
+            width: 36px;
+            height: 36px;
+            fill: #E85624;
+        }
+
+        .error-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #222222;
+            letter-spacing: -0.5px;
+        }
+
+        .error-message {
+            font-size: 15px;
+            color: #666666;
+            line-height: 1.6;
+            margin-bottom: 32px;
+            font-weight: 400;
+        }
+
+        .error-home-link {
+            display: inline-block;
+            background: #E85624;
+            color: #ffffff;
+            text-decoration: none;
+            padding: 14px 36px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            transition: background 0.2s ease;
+        }
+
+        .error-home-link:hover {
+            background: #cf4a1e;
+        }
+
+        .error-stack {
+            margin-top: 36px;
+            text-align: left;
+            background: #f7f7f7;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            overflow-x: auto;
+        }
+
+        .error-stack-title {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: #999999;
+            margin-bottom: 12px;
+        }
+
+        .error-stack pre {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 12px;
+            color: #555555;
+            white-space: pre-wrap;
+            word-break: break-all;
+            line-height: 1.7;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+                <path d="M256 32c14.2 0 27.3 7.5 34.5 19.8l216 368c7.3 12.4 7.3 27.7 .2 40.1S486.3 480 googletag472 480H40c-14.3 0-27.6-7.7-34.7-20.1s-7-27.8 .2-40.1l216-368C228.7 39.5 241.8 32 256 32zm0 128c-13.3 0-24 10.7-24 24V296c0 13.3 10.7 24 24 24s24-10.7 24-24V184c0-13.3-10.7-24-24-24zm32 224a32 32 0 1 0-64 0 32 32 0 1 0 64 0z"/>
+            </svg>
+        </div>
+        <h1 class="error-title">Oops! Something went wrong</h1>
+        <p class="error-message"><%= locals.message || 'Something went wrong' %></p>
+        <a href="/" class="error-home-link">Back to Home</a>
+
+        <% if (locals.error && locals.error.stack) { %>
+            <div class="error-stack">
+                <p class="error-stack-title">Stack Trace</p>
+                <pre><%= locals.error.stack %></pre>
+            </div>
+        <% } %>
+    </div>
+</body>
+</html>

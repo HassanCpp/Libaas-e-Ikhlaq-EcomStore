@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('partials/head') %>
+    <title>Log In | Libas-e-Ikhlaq</title>
+</head>
+<body class="auth-page">
+
+    <div class="container-fluid p-0">
+        <div class="row g-0 min-vh-100">
+            
+            <div class="col-12 col-lg-6 auth-image-side d-flex flex-column justify-content-center align-items-center text-center p-5" style="background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url('/washnwear-premium.png') center/cover no-repeat; min-height: 40vh;">
+                <h1 class="auth-brand-title text-white">LIBAS-E-IKHLAQ</h1>
+                <p class="auth-brand-tagline text-white">Elevating everyday style with premium unstitched fabrics and signature fragrances.</p>
+            </div>
+
+            <div class="col-12 col-lg-6 auth-form-side d-flex flex-column justify-content-center position-relative p-4 p-md-5 bg-white">
+                <a href="/" class="back-btn mb-4 d-inline-block text-decoration-none text-dark fw-bold"><i class="fa-solid fa-arrow-left"></i> Back to Store</a>
+
+                <div class="auth-form-wrapper mx-auto" style="max-width: 450px; width: 100%;">
+                    <h2 class="mb-2">Welcome Back</h2>
+                    <p class="text-muted mb-4">Sign in to access your account and saved items.</p>
+
+                    <% if (success_msg && success_msg.length > 0) { %>
+                        <div class="alert alert-success"><%= success_msg %></div>
+                    <% } %>
+                    <% if (error_msg && error_msg.length > 0) { %>
+                        <div class="alert alert-danger"><%= error_msg %></div>
+                    <% } %>
+
+                    <form action="/login" method="POST">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <div class="mb-3">
+                            <label for="login-email" class="form-label">Email Address</label>
+                            <input type="email" class="form-control" id="login-email" name="email" required>
+                        </div>
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between">
+                                <label for="login-password" class="form-label">Password</label>
+                                <a href="/forgot-password" class="text-muted small text-decoration-none" style="color: var(--brand-orange) !important;">Forgot Password?</a>
+                            </div>
+                            <input type="password" class="form-control" id="login-password" name="password" required>
+                        </div>
+                        <button type="submit" class="btn btn-dark w-100 py-2 fw-bold">SIGN IN</button>
+                    </form>
+
+                    <div class="text-center mt-4">
+                        Don't have an account? <a href="/register" class="text-danger fw-bold text-decoration-none">Register Now</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

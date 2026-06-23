@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('partials/head') %>
+    <title>Customer Orders | Libas-e-Ikhlaq Admin</title>
+</head>
+<body class="admin-bg">
+
+    <!-- Admin Navbar -->
+    <nav class="navbar navbar-expand-lg admin-navbar shadow-sm">
+        <div class="container-fluid px-4 align-items-center">
+            <a href="/admin" class="text-decoration-none d-flex align-items-center gap-3">
+                <img src="/logo.png" alt="Libas e ikhlaq Logo" style="height: 50px;">
+                <div class="d-flex flex-column align-items-center justify-content-center" style="margin-top: 3px;">
+                    <span dir="rtl" style="font-family: 'Noto Nastaliq Urdu', serif; font-size: 20px; color: #333; line-height: 0.8; margin-bottom: 13px;">لباس اخلاق</span>
+                    <span style="font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 2px; color: #333;">
+                        LIBAS-E-IKHLAQ <span style="color: var(--brand-orange);">ADMIN</span>
+                    </span>
+                </div>
+            </a>
+
+            <div class="d-flex gap-4 align-items-center mt-2 mt-lg-0">
+                <span class="text-muted small fw-bold" style="letter-spacing: 1px; text-transform: uppercase;">
+                    Hi, <%= currentUser.name.split(' ')[0] %>
+                </span>
+                <a href="/" class="btn btn-sm btn-outline-dark" style="border-radius: 2px; font-weight: 600; letter-spacing: 1px;" target="_blank">VIEW STORE</a>
+                <a href="/logout" style="color: var(--brand-orange); font-size: 18px;" title="Logout"><i class="fa-solid fa-arrow-right-from-bracket"></i></a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5 mb-5">
+        
+        <!-- Navigation Tabs -->
+        <ul class="nav nav-tabs mb-4" style="border-bottom: 2px solid #eee;">
+            <li class="nav-item">
+                <a class="nav-link fw-bold text-muted" href="/admin">Products Inventory</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active fw-bold text-dark border-bottom-0" style="border-top: 3px solid #111;" href="/admin/orders">Customer Orders</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link fw-bold text-muted" href="/admin/analytics">Sales & Inventory Analytics</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link fw-bold text-muted" href="/admin/users">Customer Directory</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link fw-bold text-muted" href="/admin/reviews">Reviews Moderation</a>
+            </li>
+        </ul>
+
+        <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom flex-wrap gap-3">
+            <h2 class="fw-light m-0" style="color: #111; letter-spacing: 1px;">Customer Orders</h2>
+        </div>
+
+        <!-- Success & Error Alert Panels -->
+        <% if (success_msg && success_msg.length > 0) { %>
+            <div class="alert alert-success border-0 shadow-sm mb-4" style="background-color: #f4fdf8; color: #1e8e3e; border-left: 4px solid #1e8e3e !important;">
+                <i class="fa-solid fa-check-circle me-2"></i><%= success_msg %>
+            </div>
+        <% } %>
+        <% if (error_msg && error_msg.length > 0) { %>
+            <div class="alert alert-danger border-0 shadow-sm mb-4">
+                <i class="fa-solid fa-triangle-exclamation me-2"></i><%= error_msg %>
+            </div>
+        <% } %>
+
+        <div class="card admin-card">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table admin-table mb-0">
+                        <thead>
+                            <tr>
+                                <th class="ps-4">Order ID & Date</th>
+                                <th>Customer & Address</th>
+                                <th>Items Ordered</th>
+                                <th>Total Price</th>
+                                <th>Status Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (orders && orders.length > 0) { %>
+                                <% orders.forEach(order => { %>
+                                    <tr>
+                                        <!-- ID & Timestamp -->
+                                        <td class="ps-4">
+                                            <span class="d-block fw-bold text-dark" style="font-family: monospace; font-size: 13px;">#<%= order._id %></span>
+                                            <span class="text-muted small" style="font-size: 11px;">
+                                                <%= order.createdAt.toLocaleString('en-US', { dateStyle: 'short', timeStyle: 'short' }) %>
+                                            </span>
+                                        </td>
+                                        
+                                        <!-- Delivery Coordinates -->
+                                        <td>
+                                            <div style="font-size: 13px;">
+                                                <strong><%= order.shippingAddress.fullName %></strong><br>
+                                                <span class="text-muted"><%= order.shippingAddress.addressLine %>, <%= order.shippingAddress.city %></span><br>
+                                                <span class="text-muted small">Phone: <%= order.shippingAddress.phone %></span>
+                                            </div>
+                                        </td>
+                                        
+                                        <!-- List of Items -->
+                                        <td>
+                                            <div style="font-size: 13px;">
+                                                <% order.items.forEach(item => { %>
+                                                    <div class="mb-1 text-dark">
+                                                        <span class="text-muted small"><%= item.quantity %>x</span> <%= item.name %>
+                                                        <% if (item.size) { %>
+                                                            <span class="badge bg-secondary ms-1" style="font-size: 10px; font-weight: 600;"><%= item.size %></span>
+                                                        <% } %>
+                                                    </div>
+                                                <% }) %>
+                                            </div>
+                                        </td>
+
+                                        <!-- Amount Paid -->
+                                        <td class="fw-bold text-dark" style="font-size: 14px;">
+                                            PKR <%= order.totalAmount.toLocaleString() %><br>
+                                            <span class="text-muted small" style="font-size: 11px; font-weight: normal;">Method: <%= order.paymentMethod %></span>
+                                        </td>
+
+                                        <!-- Status Forms -->
+                                        <td>
+                                            <form action="/admin/orders/status/<%= order._id %>" method="POST" class="row g-2 align-items-center m-0">
+                                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                                <!-- Payment Status Selector -->
+                                                <div class="col-auto">
+                                                    <select name="paymentStatus" class="form-select form-select-sm" style="font-size: 12px; min-width: 95px;">
+                                                        <option value="Pending" <%= order.paymentStatus === 'Pending' ? 'selected' : '' %>>Pending</option>
+                                                        <option value="Paid" <%= order.paymentStatus === 'Paid' ? 'selected' : '' %>>Paid</option>
+                                                        <option value="Failed" <%= order.paymentStatus === 'Failed' ? 'selected' : '' %>>Failed</option>
+                                                    </select>
+                                                </div>
+
+                                                <!-- Delivery Status Selector -->
+                                                <div class="col-auto">
+                                                    <select name="orderStatus" class="form-select form-select-sm" style="font-size: 12px; min-width: 105px;">
+                                                        <option value="Pending" <%= order.orderStatus === 'Pending' ? 'selected' : '' %>>Pending</option>
+                                                        <option value="Processing" <%= order.orderStatus === 'Processing' ? 'selected' : '' %>>Processing</option>
+                                                        <option value="Shipped" <%= order.orderStatus === 'Shipped' ? 'selected' : '' %>>Shipped</option>
+                                                        <option value="Delivered" <%= order.orderStatus === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                                                        <option value="Cancelled" <%= order.orderStatus === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+                                                    </select>
+                                                </div>
+
+                                                <div class="col-auto">
+                                                    <button type="submit" class="btn btn-sm btn-dark px-2 fw-bold" style="font-size: 11px;">UPDATE</button>
+                                                </div>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="5" class="text-center py-5 text-muted">
+                                        <p class="mb-0">No customer transactions have been recorded yet.</p>
+                                    </td>
+                                </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

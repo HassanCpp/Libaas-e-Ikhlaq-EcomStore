@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('partials/head') %>
+    <title>My Wishlist | Libas-e-Ikhlaq</title>
+    <style>
+        .wishlist-wrapper {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 0 20px;
+            min-height: 50vh;
+        }
+        .wishlist-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 30px;
+        }
+        .wishlist-card {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #fff;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .wishlist-card:hover {
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            transform: translateY(-5px);
+        }
+        .wishlist-img-box {
+            position: relative;
+            background: #fafafa;
+            height: 280px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+        }
+        .wishlist-img-box img {
+            max-height: 100%;
+            max-width: 100%;
+            object-fit: contain;
+        }
+        .wishlist-remove-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #fff;
+            border: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            color: #888;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .wishlist-remove-btn:hover {
+            color: #dc3545;
+            transform: scale(1.1);
+        }
+        .wishlist-info {
+            padding: 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .wishlist-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: #222;
+            text-decoration: none;
+            margin-bottom: 8px;
+            display: block;
+        }
+        .wishlist-price {
+            font-size: 15px;
+            color: var(--brand-orange);
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+        .btn-add-cart-wish {
+            background-color: #111;
+            color: #fff;
+            border: none;
+            width: 100%;
+            padding: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            border-radius: 4px;
+            transition: all 0.3s;
+            display: inline-block;
+            text-align: center;
+            text-decoration: none;
+        }
+        .btn-add-cart-wish:hover {
+            background-color: var(--brand-orange);
+        }
+        .empty-wishlist {
+            text-align: center;
+            padding: 80px 20px;
+        }
+    </style>
+</head>
+<body>
+    <%- include('partials/header') %>
+    <%- include('partials/nav') %>
+
+    <div class="wishlist-wrapper">
+        <h1 class="page-title">My Wishlist</h1>
+
+        <!-- Messages -->
+        <% if (locals.success_msg && success_msg.length > 0) { %>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <%= success_msg %>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        <% } %>
+        <% if (locals.error_msg && error_msg.length > 0) { %>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <%= error_msg %>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        <% } %>
+
+        <% if (wishlistItems.length > 0) { %>
+            <div class="wishlist-grid">
+                <% wishlistItems.forEach(item => { %>
+                    <div class="wishlist-card">
+                        <div class="wishlist-img-box">
+                            <img src="<%= item.image %>" alt="<%= item.name %>">
+                            
+                            <!-- Remove Form -->
+                            <form action="/wishlist/remove" method="POST">
+                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                <input type="hidden" name="productId" value="<%= item._id %>">
+                                <button type="submit" class="wishlist-remove-btn" title="Remove from Wishlist">
+                                    <i class="fa-solid fa-xmark"></i>
+                                </button>
+                            </form>
+                        </div>
+                        
+                        <div class="wishlist-info">
+                            <div>
+                                <a href="/products/<%= item._id %>" class="wishlist-name"><%= item.name %></a>
+                                <div class="wishlist-price">
+                                    <% if (item.discountPrice && item.discountPrice > 0 && item.discountPrice < item.price) { %>
+                                        <span class="text-muted text-decoration-line-through me-2" style="font-size: 0.8em; font-weight: normal;">PKR <%= item.price.toLocaleString() %></span>
+                                        PKR <%= item.discountPrice.toLocaleString() %>
+                                    <% } else { %>
+                                        PKR <%= item.price.toLocaleString() %>
+                                    <% } %>
+                                </div>
+                            </div>
+                            
+                            <!-- Add to Cart Form -->
+                            <form action="/cart/add" method="POST">
+                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                <input type="hidden" name="productId" value="<%= item._id %>">
+                                <input type="hidden" name="quantity" value="1">
+                                <button type="submit" class="btn-add-cart-wish">Add To Cart</button>
+                            </form>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+        <% } else { %>
+            <div class="empty-wishlist">
+                <i class="fa-regular fa-heart fa-4x text-muted mb-4"></i>
+                <h3 class="mb-3">Your Wishlist is Empty</h3>
+                <p class="text-muted mb-4">Explore our collections and save your favorite garments here.</p>
+                <a href="/products" class="btn btn-dark px-4 py-2 fw-bold" style="letter-spacing: 1px;">BROWSE PRODUCTS</a>
+            </div>
+        <% } %>
+    </div>
+
+    <%- include('partials/footer') %>
+</body>
+</html>

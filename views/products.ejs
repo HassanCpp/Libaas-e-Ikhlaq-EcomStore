@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('partials/head') %>
+    <title>Collections | Libas-e-Ikhlaq</title>
+</head>
+<body>
+    <%- include('partials/header') %>
+    <%- include('partials/nav') %>
+
+    <div class="filter-overlay" id="filterOverlay"></div>
+
+    <main class="premium-catalog">
+        
+        <div class="catalog-top-bar">
+            <button id="filterToggleBtn" class="filter-toggle-btn">
+                <i class="fa-solid fa-sliders"></i> FILTERS
+            </button>
+            <p class="results-count">Showing <%= products.length %> results</p>
+        </div>
+
+        <aside class="premium-sidebar" id="filterSidebar">
+            <div class="sidebar-header">
+                <h2>FILTERS</h2>
+                <i class="fa-solid fa-xmark close-filter" id="closeFilterBtn"></i>
+            </div>
+            
+            <form action="/products" method="GET" id="filterForm">
+                <% if (query.search) { %>
+                    <input type="hidden" name="search" value="<%= query.search %>">
+                <% } %>
+
+                <div class="filter-block">
+                    <h3>Sort By:</h3>
+                    <label class="radio-label">
+                        <input type="radio" name="sort" value="" <%= !query.sort ? 'checked' : '' %>> 
+                        <span class="custom-radio"></span> Featured
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="sort" value="price-asc" <%= query.sort === 'price-asc' ? 'checked' : '' %>> 
+                        <span class="custom-radio"></span> Price, low to high
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="sort" value="price-desc" <%= query.sort === 'price-desc' ? 'checked' : '' %>> 
+                        <span class="custom-radio"></span> Price, high to low
+                    </label>
+                </div>
+
+                <div class="filter-block">
+                    <h3>Product Category</h3>
+                    <label class="radio-label">
+                        <input type="radio" name="category" value="" <%= !query.category ? 'checked' : '' %>> 
+                        <span class="custom-radio"></span> All Collections
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="category" value="unstitched" <%= query.category === 'unstitched' ? 'checked' : '' %>> 
+                        <span class="custom-radio"></span> Unstitched Fabric
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="category" value="kurta-pajama" <%= query.category === 'kurta-pajama' ? 'checked' : '' %>> 
+                        <span class="custom-radio"></span> Kurta Pajama
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="category" value="waistcoats" <%= query.category === 'waistcoats' ? 'checked' : '' %>> 
+                        <span class="custom-radio"></span> Waistcoats
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="category" value="fragrance" <%= query.category === 'fragrance' ? 'checked' : '' %>> 
+                        <span class="custom-radio"></span> Fragrance
+                    </label>
+                    <label class="radio-label">
+                        <input type="radio" name="category" value="accessories" <%= query.category === 'accessories' ? 'checked' : '' %>>
+                        <span class="custom-radio"></span>
+                        Accessories
+                    </label>
+                </div>
+
+                <button type="submit" class="btn-apply-filters">APPLY FILTERS</button>
+            </form>
+        </aside>
+
+        <section class="premium-grid-area container-fluid px-0">
+            
+            <div class="row g-4"> 
+                <% if (products.length > 0) { %>
+                    <% products.forEach(product => { %>
+                        <div class="col-6 col-md-4 col-lg-3">
+                            <div class="p-card h-100">
+                                <div class="p-image-wrap">
+                                    <a href="/products/<%= product._id %>">
+                                        <img src="<%= product.image %>" alt="<%= product.name %>" class="img-fluid w-100">
+                                    </a>
+                                    <div class="p-overlay">
+                                        <% if (product.category === 'kurta-pajama' || product.category === 'waistcoats') { %>
+                                            <a href="/products/<%= product._id %>" class="btn-quick-add w-100 text-decoration-none d-flex align-items-center justify-content-center" style="height: 100%; border-radius: 4px; display: inline-flex; font-weight: bold; letter-spacing: 1px;">SELECT SIZE</a>
+                                        <% } else { %>
+                                            <form action="/cart/add" method="POST" style="width: 100%;">
+                                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                                <input type="hidden" name="productId" value="<%= product._id %>">
+                                                <input type="hidden" name="quantity" value="1">
+                                                <button type="submit" class="btn-quick-add w-100">QUICK ADD</button>
+                                            </form>
+                                        <% } %>
+                                    </div>
+                                </div>
+                                <div class="p-details text-center mt-2">
+                                    <h3 class="p-title fs-6">
+                                        <a href="/products/<%= product._id %>" style="text-decoration: none; color: inherit;">
+                                            <%= product.name %>
+                                        </a>
+                                    </h3>
+                                    <p class="p-price fw-bold text-danger">
+                                        <% if (product.discountPrice && product.discountPrice > 0 && product.discountPrice < product.price) { %>
+                                            <span class="text-muted text-decoration-line-through me-2" style="font-size: 0.9em; font-weight: normal;">PKR <%= product.price.toLocaleString() %></span>
+                                            PKR <%= product.discountPrice.toLocaleString() %>
+                                        <% } else { %>
+                                            PKR <%= product.price.toLocaleString() %>
+                                        <% } %>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    <% }) %>
+                <% } else { %>
+                    <div class="col-12 text-center my-5 no-results">
+                        <p>No products found matching your criteria.</p>
+                        <a href="/products" class="btn-dark mt-3">Clear Filters</a>
+                    </div>
+                <% } %>
+            </div>
+
+            <% if (totalPages > 1) { %>
+                <div class="premium-pagination">
+                    <% if (currentPage > 1) { %>
+                        <a href="/products?page=<%= currentPage - 1 %>&category=<%= query.category || '' %>&sort=<%= query.sort || '' %>" class="page-nav">« PREV</a>
+                    <% } %>
+
+                    <div class="page-numbers">
+                        <% for(let i = 1; i <= totalPages; i++) { %>
+                            <a href="/products?page=<%= i %>&category=<%= query.category || '' %>&sort=<%= query.sort || '' %>" 
+                               class="page-num <%= currentPage === i ? 'active' : '' %>">
+                                <%= i %>
+                            </a>
+                        <% } %>
+                    </div>
+
+                    <% if (currentPage < totalPages) { %>
+                        <a href="/products?page=<%= currentPage + 1 %>&category=<%= query.category || '' %>&sort=<%= query.sort || '' %>" class="page-nav">NEXT »</a>
+                    <% } %>
+                </div>
+            <% } %>
+
+        </section>
+    </main>
+
+    <%- include('partials/footer') %>
+
+    <script>
+        const filterToggleBtn = document.getElementById('filterToggleBtn');
+        const closeFilterBtn = document.getElementById('closeFilterBtn');
+        const filterSidebar = document.getElementById('filterSidebar');
+        const filterOverlay = document.getElementById('filterOverlay');
+
+        function toggleFilters() {
+            filterSidebar.classList.toggle('open');
+            filterOverlay.classList.toggle('show');
+        }
+
+        filterToggleBtn.addEventListener('click', toggleFilters);
+        closeFilterBtn.addEventListener('click', toggleFilters);
+        filterOverlay.addEventListener('click', toggleFilters);
+    </script>
+</body>
+</html>

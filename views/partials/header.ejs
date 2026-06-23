@@ -1,0 +1,73 @@
+<header class="main-header">
+    
+    <div class="logo-container">
+      <a href="/">
+        <img src="/logo.png" alt="Libas e ikhlaq Logo" class="brand-logo">
+      </a>
+    </div>
+    
+    <div class="brand-title-container">
+        <div class="brand-title-ur" dir="rtl">لباس اخلاق</div>
+        <div class="brand-title-en">LIBAS-E-IKHLAQ</div>
+    </div>
+    
+    <div class="header-icons">
+        <form action="/products" method="GET" class="header-search-form d-flex align-items-center m-0" style="position: relative;">
+            <input type="text" name="search" placeholder="Search..." style="border-radius: 20px; padding: 4px 30px 4px 12px; font-size: 13px; max-width: 140px; border: 1px solid #ddd; height: 32px; font-family: 'Montserrat', sans-serif;" value="<%= (locals.query && query.search) ? query.search : '' %>">
+            <button type="submit" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; padding: 0; color: #333; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                <i class="fa-solid fa-magnifying-glass" style="font-size: 14px; margin: 0;"></i>
+            </button>
+        </form>
+
+        <a href="/wishlist" class="header-icon-link" title="Wishlist">
+            <i class="fa-regular fa-heart"></i>
+            <% 
+                let wishlistCount = 0;
+                if (locals.session && session.wishlist) {
+                    wishlistCount = session.wishlist.length;
+                }
+            %>
+            <% if (wishlistCount > 0) { %>
+                <span class="badge-count"><%= wishlistCount %></span>
+            <% } %>
+        </a>
+        
+        <% if (locals.currentUser) { %>
+            <span style="font-size: 12px; font-weight: 600; color: #333; white-space: nowrap;">
+                Hi, <%= locals.currentUser.name.split(' ')[0] %>!
+            </span>
+            
+            <% if (locals.currentUser.role === 'admin') { %>
+                <a href="/admin" class="header-icon-link" style="color: var(--brand-orange);" title="Admin Dashboard">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </a>
+            <% } %>
+
+            <a href="/orders" class="header-icon-link" title="My Orders">
+                <i class="fa-solid fa-box"></i>
+            </a>
+
+            <a href="/logout" class="header-icon-link" title="Logout">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i>
+            </a>
+        <% } else { %>
+            <a href="/login" class="header-icon-link" title="Login/Register">
+                <i class="fa-regular fa-user"></i>
+            </a>
+        <% } %>
+
+        <a href="/cart" class="header-icon-link" title="Cart">
+            <i class="fa-solid fa-bag-shopping"></i>
+            <% 
+                let cartCount = 0;
+                if (locals.session && session.cart) {
+                    cartCount = session.cart.reduce((sum, item) => sum + item.quantity, 0);
+                }
+            %>
+            <% if (cartCount > 0) { %>
+                <span class="badge-count"><%= cartCount %></span>
+            <% } %>
+        </a>
+    </div>
+    
+</header>

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('partials/head') %>
+    <title>My Orders | Libas-e-Ikhlaq</title>
+    <style>
+        .orders-wrapper {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 0 20px;
+            min-height: 50vh;
+        }
+        .order-table th {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            font-size: 13px;
+            text-transform: uppercase;
+            padding: 15px;
+        }
+        .order-table td {
+            vertical-align: middle;
+            padding: 15px;
+            font-size: 14px;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .status-pending { background-color: #ffebee; color: #c62828; }
+        .status-processing { background-color: #fff3e0; color: #ef6c00; }
+        .status-shipped { background-color: #e3f2fd; color: #0d47a1; }
+        .status-delivered { background-color: #e8f5e9; color: #2e7d32; }
+        .status-cancelled { background-color: #eeeeee; color: #616161; }
+        
+        .empty-orders {
+            text-align: center;
+            padding: 80px 20px;
+        }
+    </style>
+</head>
+<body>
+    <%- include('partials/header') %>
+    <%- include('partials/nav') %>
+
+    <div class="orders-wrapper">
+        <h1 class="page-title">Order History</h1>
+
+        <!-- Messages -->
+        <% if (locals.success_msg && success_msg.length > 0) { %>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <%= success_msg %>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        <% } %>
+        <% if (locals.error_msg && error_msg.length > 0) { %>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <%= error_msg %>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        <% } %>
+
+        <% if (orders.length > 0) { %>
+            <div class="table-responsive">
+                <table class="table order-table table-hover">
+                    <thead>
+                        <tr class="table-light">
+                            <th>Order ID</th>
+                            <th>Date</th>
+                            <th>Items</th>
+                            <th>Total Price</th>
+                            <th>Payment</th>
+                            <th>Order Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% orders.forEach(order => { %>
+                            <tr>
+                                <td class="fw-bold text-dark">#<%= order._id %></td>
+                                <td><%= new Date(order.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) %></td>
+                                <td>
+                                    <% order.items.forEach(item => { %>
+                                        <div class="small text-muted">
+                                            <%= item.quantity %>x <%= item.name %>
+                                            <% if (item.size) { %>
+                                                <span class="badge bg-light text-dark border ms-1" style="font-size: 10px; font-weight: 600;"><%= item.size %></span>
+                                            <% } %>
+                                        </div>
+                                    <% }) %>
+                                </td>
+                                <td class="fw-bold">PKR <%= order.totalAmount.toLocaleString() %></td>
+                                <td>
+                                    <span class="status-badge <%= order.paymentStatus === 'Paid' ? 'status-delivered' : 'status-pending' %>">
+                                        <%= order.paymentStatus %>
+                                    </span>
+                                </td>
+                                <td>
+                                    <% 
+                                        let statusClass = 'status-pending';
+                                        if (order.orderStatus === 'Processing') statusClass = 'status-processing';
+                                        else if (order.orderStatus === 'Shipped') statusClass = 'status-shipped';
+                                        else if (order.orderStatus === 'Delivered') statusClass = 'status-delivered';
+                                        else if (order.orderStatus === 'Cancelled') statusClass = 'status-cancelled';
+                                    %>
+                                    <span class="status-badge <%= statusClass %>">
+                                        <%= order.orderStatus %>
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="/orders/success/<%= order._id %>" class="btn btn-sm btn-dark fw-bold px-3">View Details</a>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        <% } else { %>
+            <div class="empty-orders">
+                <i class="fa-solid fa-box-open fa-4x text-muted mb-4"></i>
+                <h3 class="mb-3">No Orders Yet</h3>
+                <p class="text-muted mb-4">You have not placed any orders yet. Start exploring our collections today!</p>
+                <a href="/products" class="btn btn-dark px-4 py-2 fw-bold" style="letter-spacing: 1px;">BROWSE PRODUCTS</a>
+            </div>
+        <% } %>
+    </div>
+
+    <%- include('partials/footer') %>
+</body>
+</html>

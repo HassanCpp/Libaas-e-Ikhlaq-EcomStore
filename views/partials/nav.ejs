@@ -1,0 +1,41 @@
+<nav class="top-nav">
+    <div class="hamburger" id="hamburger-menu">
+        <i class="fa-solid fa-bars"></i>
+    </div>
+    <ul id="nav-links">
+        <li><a href="/">HOME</a></li>
+        <li><a href="/products?category=unstitched">UNSTITCHED</a></li>
+        <li><a href="/products?category=kurta-pajama">KURTA PAJAMA</a></li>
+        <li><a href="/products?category=waistcoats">WAISTCOATS</a></li>
+        <li><a href="/products?category=fragrance">FRAGRANCE</a></li>
+        <li><a href="/products?category=accessories">ACCESSORIES</a></li>
+        <li><a href="/contact-us">CONTACT US</a></li>
+    </ul>
+</nav>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // 1. Get the current path (e.g., '/', '/products', or '/contact-us')
+        const pathname = window.location.pathname;
+        
+        // 2. Get the category from the URL query (e.g., '?category=kurta-pajama')
+        const urlParams = new URLSearchParams(window.location.search);
+        const category = urlParams.get('category');
+        
+        // 3. Logic to find and highlight the correct link
+        if (pathname === '/products' && category) {
+            // Find the link that contains this specific category in its href
+            const activeLink = document.querySelector(`#nav-links a[href*="category=${category}"]`);
+            if (activeLink) activeLink.classList.add('highlight');
+            
+        } else if (pathname === '/') {
+            // If we are strictly on the homepage, highlight HOME
+            const homeLink = document.querySelector('#nav-links a[href="/"]');
+            if (homeLink) homeLink.classList.add('highlight');
+            
+        } else if (pathname === '/contact-us') {
+            // If we are on contact page, highlight CONTACT US
+            const contactLink = document.querySelector('#nav-links a[href="/contact-us"]');
+            if (contactLink) contactLink.classList.add('highlight');
+        }
+    });
+</script>

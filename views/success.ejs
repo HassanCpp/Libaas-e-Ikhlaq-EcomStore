@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('partials/head') %>
+    <title>Order Confirmed | Libas-e-Ikhlaq</title>
+    <style>
+        .success-box {
+            max-width: 600px;
+            margin: 60px auto;
+            background-color: #fff;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 40px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        .success-icon {
+            color: #2e7d32;
+            margin-bottom: 25px;
+        }
+        .order-id-badge {
+            background-color: #f5f5f5;
+            border: 1px dashed #ccc;
+            padding: 10px 20px;
+            font-size: 15px;
+            font-weight: 700;
+            display: inline-block;
+            margin-bottom: 30px;
+            font-family: monospace;
+        }
+        .receipt-table {
+            text-align: left;
+            margin: 30px 0;
+            border-top: 1px solid #eee;
+            border-bottom: 1px solid #eee;
+            padding: 15px 0;
+        }
+        .receipt-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <%- include('partials/header') %>
+    <%- include('partials/nav') %>
+
+    <main class="container">
+        <div class="success-box">
+            <div class="success-icon">
+                <i class="fa-solid fa-circle-check fa-4x animate__animated animate__bounceIn"></i>
+            </div>
+            
+            <h1 class="mb-3">Order Confirmed!</h1>
+            <p class="text-muted mb-4">Thank you for your purchase. We have received your order and are processing it.</p>
+            
+            <div class="order-id-badge">
+                ORDER ID: #<%= order._id %>
+            </div>
+
+            <div class="receipt-table">
+                <h5 class="mb-3 font-weight-bold" style="text-align: left;">Delivery Address</h5>
+                <p class="text-muted small mb-4" style="text-align: left; line-height: 1.6;">
+                    <strong>Recipient:</strong> <%= order.shippingAddress.fullName %><br>
+                    <strong>Address:</strong> <%= order.shippingAddress.addressLine %>, <%= order.shippingAddress.city %>, <%= order.shippingAddress.postalCode %><br>
+                    <strong>Contact Phone:</strong> <%= order.shippingAddress.phone %>
+                </p>
+
+                <h5 class="mb-3 font-weight-bold" style="text-align: left;">Items Summary</h5>
+                <% order.items.forEach(item => { %>
+                    <div class="receipt-row">
+                        <span>
+                            <%= item.quantity %>x <%= item.name %>
+                            <% if (item.size) { %>
+                                <span class="badge bg-secondary ms-1" style="font-size: 10px; font-weight: 600;"><%= item.size %></span>
+                            <% } %>
+                        </span>
+                        <span>PKR <%= (item.price * item.quantity).toLocaleString() %></span>
+                    </div>
+                <% }) %>
+                
+                <div class="receipt-row fw-bold text-danger pt-2 border-top mt-2">
+                    <span>Grand Total</span>
+                    <span>PKR <%= order.totalAmount.toLocaleString() %></span>
+                </div>
+            </div>
+
+            <p class="small text-muted mb-4">An invoice details log has been generated. Estimated delivery: 3 to 5 business days.</p>
+
+            <div class="d-flex justify-content-center gap-3">
+                <a href="/products" class="btn btn-dark px-4 py-2 fw-bold">Continue Shopping</a>
+            </div>
+        </div>
+    </main>
+
+    <%- include('partials/footer') %>
+</body>
+</html>

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('partials/head') %>
+    <title>Customer Directory | Libas-e-Ikhlaq Admin</title>
+</head>
+<body class="admin-bg">
+
+    <nav class="navbar navbar-expand-lg admin-navbar shadow-sm">
+        <div class="container-fluid px-4 align-items-center">
+            <a href="/admin" class="text-decoration-none d-flex align-items-center gap-3">
+                <img src="/logo.png" alt="Libas e ikhlaq Logo" style="height: 50px;">
+                <div class="d-flex flex-column align-items-center justify-content-center" style="margin-top: 3px;">
+                    <span dir="rtl" style="font-family: 'Noto Nastaliq Urdu', serif; font-size: 20px; color: #333; line-height: 0.8; margin-bottom: 13px;">لباس اخلاق</span>
+                    <span style="font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 2px; color: #333;">
+                        LIBAS-E-IKHLAQ <span style="color: var(--brand-orange);">ADMIN</span>
+                    </span>
+                </div>
+            </a>
+
+            <div class="d-flex gap-4 align-items-center mt-2 mt-lg-0">
+                <span class="text-muted small fw-bold" style="letter-spacing: 1px; text-transform: uppercase;">
+                    Hi, <%= currentUser.name.split(' ')[0] %>
+                </span>
+                <a href="/" class="btn btn-sm btn-outline-dark" style="border-radius: 2px; font-weight: 600; letter-spacing: 1px;" target="_blank">VIEW STORE</a>
+                <a href="/logout" style="color: var(--brand-orange); font-size: 18px;" title="Logout"><i class="fa-solid fa-arrow-right-from-bracket"></i></a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5 mb-5">
+        
+        <!-- Navigation Tabs -->
+        <ul class="nav nav-tabs mb-4" style="border-bottom: 2px solid #eee;">
+            <li class="nav-item">
+                <a class="nav-link fw-bold text-muted" href="/admin">Products Inventory</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link fw-bold text-muted" href="/admin/orders">Customer Orders</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link fw-bold text-muted" href="/admin/analytics">Sales & Inventory Analytics</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active fw-bold text-dark border-bottom-0" style="border-top: 3px solid #111;" href="/admin/users">Customer Directory</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link fw-bold text-muted" href="/admin/reviews">Reviews Moderation</a>
+            </li>
+        </ul>
+
+        <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom flex-wrap gap-3">
+            <h2 class="fw-light m-0" style="color: #111; letter-spacing: 1px;">Customer Directory</h2>
+            <div class="d-flex gap-2">
+                <input type="text" id="user-search-input" placeholder="Search by email..." class="form-control form-control-sm" style="max-width: 250px; border-radius: 2px; font-size: 13px; font-family: 'Montserrat', sans-serif;">
+            </div>
+        </div>
+
+        <!-- Success & Error Alert Panels -->
+        <% if (success_msg && success_msg.length > 0) { %>
+            <div class="alert alert-success border-0 shadow-sm mb-4" style="background-color: #f4fdf8; color: #1e8e3e; border-left: 4px solid #1e8e3e !important;">
+                <i class="fa-solid fa-check-circle me-2"></i><%= success_msg %>
+            </div>
+        <% } %>
+        <% if (error_msg && error_msg.length > 0) { %>
+            <div class="alert alert-danger border-0 shadow-sm mb-4">
+                <i class="fa-solid fa-triangle-exclamation me-2"></i><%= error_msg %>
+            </div>
+        <% } %>
+
+        <div class="card admin-card">
+            <div class="table-responsive">
+                <table class="table admin-table align-middle mb-0" id="users-table">
+                    <thead>
+                        <tr>
+                            <th>No.</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Registered On</th>
+                            <th>Orders Placed</th>
+                            <th>Role</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (users.length > 0) { %>
+                            <% users.forEach((user, index) => { %>
+                                <tr class="user-row">
+                                    <td class="text-muted"><%= index + 1 %></td>
+                                    <td><strong style="font-size: 14px;"><%= user.name %></strong></td>
+                                    <td class="user-email-cell" style="font-size: 13px;"><%= user.email %></td>
+                                    <td style="font-size: 13px;"><%= new Date(user.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) %></td>
+                                    <td>
+                                        <span class="badge rounded-pill bg-light text-dark border px-3 py-2 fw-bold" style="font-size: 12px;">
+                                            <%= user.orderCount %>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <% if (user.role === 'admin') { %>
+                                            <span class="badge bg-dark text-white fw-bold px-3 py-1.5" style="font-size: 11px; letter-spacing: 0.5px; border-radius: 2px;">ADMIN</span>
+                                        <% } else { %>
+                                            <span class="badge bg-light text-dark border fw-bold px-3 py-1.5" style="font-size: 11px; letter-spacing: 0.5px; border-radius: 2px;">CUSTOMER</span>
+                                        <% } %>
+                                    </td>
+                                    <td class="text-end">
+                                        <form action="/admin/users/role/<%= user._id %>" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to change this customer\'s role? <%= user.role === 'admin' ? 'This will DEMOTE the administrator to a regular customer, stripping all dashboard access.' : 'This will PROMOTE the customer to an administrator, granting full dashboard privileges.' %>');">
+                                            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                            <% if (user._id.toString() === currentUser.id.toString()) { %>
+                                                <button type="button" class="btn btn-sm btn-light disabled px-3 py-1.5 fw-bold" style="font-size: 12px; border-radius: 2px;" title="You cannot demote yourself.">
+                                                    <i class="fa-solid fa-lock me-1"></i> LOCK
+                                                </button>
+                                            <% } else { %>
+                                                <button type="submit" class="btn btn-sm <%= user.role === 'admin' ? 'btn-outline-danger' : 'btn-outline-dark' %> px-3 py-1.5 fw-bold" style="font-size: 12px; border-radius: 2px;">
+                                                    <i class="fa-solid <%= user.role === 'admin' ? 'fa-user-minus' : 'fa-user-shield' %> me-1"></i>
+                                                    <%= user.role === 'admin' ? 'DEMOTE' : 'PROMOTE' %>
+                                                </button>
+                                            <% } %>
+                                        </form>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="7" class="text-center py-5 text-muted">No registered users found.</td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <p class="text-center mt-4 mb-5 text-muted" style="letter-spacing: 1px; font-size: 11px;">
+        &copy; 2026 LIBAS-E-IKHLAQ BOUTIQUE MANAGEMENT
+    </p>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const searchInput = document.getElementById("user-search-input");
+            const rows = document.querySelectorAll(".user-row");
+
+            searchInput.addEventListener("keyup", function() {
+                const query = searchInput.value.toLowerCase().trim();
+                rows.forEach(row => {
+                    const email = row.querySelector(".user-email-cell").textContent.toLowerCase();
+                    if (email.includes(query)) {
+                        row.style.display = "";
+                    } else {
+                        row.style.display = "none";
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

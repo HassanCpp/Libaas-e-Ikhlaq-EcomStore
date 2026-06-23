@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('partials/head') %>
+    <title>Create Account | Libas-e-Ikhlaq</title>
+</head>
+<body class="auth-page">
+
+    <div class="container-fluid p-0">
+        <div class="row g-0 min-vh-100 flex-lg-row-reverse">
+            
+            <div class="col-12 col-lg-6 auth-image-side d-flex flex-column justify-content-center align-items-center text-center p-5" style="background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url('/maroonkurta.png') center/cover no-repeat; min-height: 40vh;">
+                <h1 class="auth-brand-title text-white">JOIN THE CLUB</h1>
+                <p class="auth-brand-tagline text-white">Create an account to track your orders, save your wishlist, and check out faster.</p>
+            </div>
+
+            <div class="col-12 col-lg-6 auth-form-side d-flex flex-column justify-content-center position-relative p-4 p-md-5 bg-white">
+                <a href="/" class="back-btn mb-4 d-inline-block text-decoration-none text-dark fw-bold"><i class="fa-solid fa-arrow-left"></i> Back to Store</a>
+
+                <div class="auth-form-wrapper mx-auto" style="max-width: 450px; width: 100%;">
+                    <h2 class="mb-2">Create Account</h2>
+                    <p class="text-muted mb-4">Please fill in the details below to register.</p>
+
+                    <% if (error_msg && error_msg.length > 0) { %>
+                        <div class="alert alert-danger"><%= error_msg %></div>
+                    <% } %>
+
+                    <form action="/register" method="POST">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <div class="mb-3">
+                            <label for="reg-name" class="form-label">Full Name</label>
+                            <input type="text" class="form-control" id="reg-name" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="reg-email" class="form-label">Email Address</label>
+                            <input type="email" class="form-control" id="reg-email" name="email" required>
+                        </div>
+                        <div class="mb-4">
+                            <label for="reg-password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="reg-password" name="password" minlength="6" placeholder="Min. 6 characters" required>
+                        </div>
+                        <button type="submit" class="btn btn-dark w-100 py-2 fw-bold" style="background-color: var(--brand-orange); border-color: var(--brand-orange);">REGISTER NOW</button>
+                    </form>
+
+                    <div class="text-center mt-4">
+                        Already have an account? <a href="/login" class="fw-bold text-decoration-none" style="color: var(--brand-orange);">Log In</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

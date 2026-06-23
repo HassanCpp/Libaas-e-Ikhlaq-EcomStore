@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('partials/head') %>
+    <title><%= product.name %> | Libas-e-Ikhlaq</title>
+    <style>
+        .product-detail-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        .product-image-box {
+            background-color: #fcfcfc;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            overflow: hidden;
+            text-align: center;
+            padding: 20px;
+        }
+        .product-image-box img {
+            max-height: 500px;
+            object-fit: contain;
+            transition: transform 0.3s ease;
+        }
+        .product-image-box img:hover {
+            transform: scale(1.03);
+        }
+        .product-meta-box {
+            padding: 10px 0 10px 20px;
+        }
+        .product-category {
+            text-transform: uppercase;
+            font-size: 13px;
+            letter-spacing: 2px;
+            color: #888;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        .product-title {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            color: #111;
+            font-size: 1.5rem;
+            margin-bottom: 12px;
+        }
+        .rating-stars {
+            color: #ffc107;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .rating-value {
+            color: #555;
+            font-weight: 600;
+            font-size: 14px;
+            margin-left: 5px;
+        }
+        .product-price {
+            font-size: 1.3rem;
+            color: var(--brand-orange);
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        .stock-indicator {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        .stock-in {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        .stock-out {
+            background-color: #ffebee;
+            color: #c62828;
+        }
+        .stock-low {
+            background-color: #fff3e0;
+            color: #ef6c00;
+        }
+        .qty-input-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .qty-selector {
+            display: flex;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            overflow: hidden;
+            width: 120px;
+        }
+        .qty-btn {
+            background: #f5f5f5;
+            border: none;
+            width: 35px;
+            height: 40px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .qty-btn:hover {
+            background: #e0e0e0;
+        }
+        .qty-input {
+            border: none;
+            width: 50px;
+            text-align: center;
+            font-weight: 600;
+            outline: none;
+        }
+        .btn-add-cart {
+            background-color: #111;
+            color: #fff;
+            border: none;
+            padding: 12px 35px;
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            border-radius: 4px;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .btn-add-cart:hover {
+            background-color: var(--brand-orange);
+            transform: translateY(-2px);
+        }
+        .btn-disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .btn-disabled:hover {
+            background-color: #ccc;
+            transform: none;
+        }
+        .size-select-btn {
+            font-weight: 600;
+            border-radius: 4px;
+            min-width: 46px;
+            font-size: 13px;
+            padding: 6px 12px;
+            transition: all 0.2s;
+        }
+        .size-select-btn.active {
+            background-color: var(--brand-orange) !important;
+            border-color: var(--brand-orange) !important;
+            color: #fff !important;
+        }
+        .reviews-section {
+            border-top: 1px solid #eee;
+            margin-top: 60px;
+            padding-top: 40px;
+        }
+        .reviews-title {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            margin-bottom: 30px;
+        }
+        .review-card {
+            border-bottom: 1px solid #f0f0f0;
+            padding: 20px 0;
+        }
+        .review-card:last-child {
+            border-bottom: none;
+        }
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .reviewer-name {
+            font-weight: 600;
+            color: #222;
+        }
+        .review-date {
+            font-size: 12px;
+            color: #999;
+        }
+        .review-stars {
+            color: #ffc107;
+            font-size: 13px;
+        }
+        .review-text {
+            color: #555;
+            line-height: 1.6;
+        }
+        .write-review-card {
+            background-color: #fcfcfc;
+            border: 1px solid #eaeaea;
+            border-radius: 6px;
+            padding: 25px;
+            margin-top: 40px;
+        }
+        .rating-select {
+            display: flex;
+            gap: 10px;
+            font-size: 20px;
+            color: #ccc;
+            margin-bottom: 15px;
+            cursor: pointer;
+        }
+        .rating-select i:hover,
+        .rating-select i.selected {
+            color: #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <%- include('partials/header') %>
+    <%- include('partials/nav') %>
+
+    <div class="product-detail-container">
+        <!-- Messages -->
+        <% if (success_msg && success_msg.length > 0) { %>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <%= success_msg %>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        <% } %>
+        <% if (error_msg && error_msg.length > 0) { %>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <%= error_msg %>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        <% } %>
+
+        <div class="row">
+            <!-- Product Image -->
+            <div class="col-md-6 mb-4">
+                <div class="product-image-box">
+                    <img src="<%= product.image %>" alt="<%= product.name %>" class="img-fluid">
+                </div>
+            </div>
+
+            <!-- Product Details -->
+            <div class="col-md-6 mb-4">
+                <div class="product-meta-box">
+                    <div class="product-category"><%= product.category %></div>
+                    <h1 class="product-title"><%= product.name %></h1>
+                    
+                    <!-- Rating Summary -->
+                    <div class="rating-stars">
+                        <% for (let i = 1; i <= 5; i++) { %>
+                            <i class="<%= i <= Math.round(product.rating || 0) ? 'fa-solid' : 'fa-regular' %> fa-star"></i>
+                        <% } %>
+                        <span class="rating-value">
+                            <%= product.rating ? product.rating.toFixed(1) : '0.0' %> / 5.0 (<%= reviews.length %> reviews)
+                        </span>
+                    </div>
+
+                    <div class="product-price">
+                        <% if (product.discountPrice && product.discountPrice > 0 && product.discountPrice < product.price) { %>
+                            <span class="text-muted text-decoration-line-through me-2" style="font-size: 0.8em; font-weight: normal;">PKR <%= product.price.toLocaleString() %></span>
+                            PKR <%= product.discountPrice.toLocaleString() %>
+                        <% } else { %>
+                            PKR <%= product.price.toLocaleString() %>
+                        <% } %>
+                    </div>
+
+                    <!-- Stock Status -->
+                    <span id="stock-status-container">
+                        <% const isClothingItem = (product.category === 'kurta-pajama' || product.category === 'waistcoats'); %>
+                        <% if (isClothingItem) { %>
+                            <span class="stock-indicator" style="background-color: #f0f4ff; color: #3b5998;"><i class="fa-solid fa-ruler"></i> Select a size to check availability</span>
+                        <% } else if (product.stock <= 0) { %>
+                            <span class="stock-indicator stock-out"><i class="fa-solid fa-circle-xmark"></i> Out of Stock</span>
+                        <% } else if (product.stock <= 5) { %>
+                            <span class="stock-indicator stock-low"><i class="fa-solid fa-circle-exclamation"></i> Only <%= product.stock %> units left</span>
+                        <% } else { %>
+                            <span class="stock-indicator stock-in"><i class="fa-solid fa-circle-check"></i> In Stock (<%= product.stock %> available)</span>
+                        <% } %>
+                    </span>
+
+                    <!-- Add to Cart Form -->
+                    <form action="/cart/add" method="POST" id="add-to-cart-form">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <input type="hidden" name="productId" value="<%= product._id %>">
+                        
+                        <% if (product.category === 'kurta-pajama' || product.category === 'waistcoats') { %>
+                            <div class="mb-4">
+                                <label class="fw-bold d-block mb-2" style="font-size: 13px; letter-spacing: 0.5px;">SELECT SIZE:</label>
+                                <div class="d-flex gap-2" id="size-button-group">
+                                    <% ['XS', 'S', 'M', 'L', 'XL'].forEach(size => { %>
+                                        <button type="button" class="btn btn-outline-dark size-select-btn px-3 py-2" data-size="<%= size %>" data-stock="<%= product.sizes ? (product.sizes.toObject()[size] || 0) : 0 %>">
+                                            <%= size %>
+                                        </button>
+                                    <% }) %>
+                                </div>
+                                <input type="hidden" name="size" id="selected-size-input" required>
+                            </div>
+                        <% } %>
+                        
+                        <div class="qty-input-group">
+                            <label for="quantity" class="fw-bold m-0" style="font-size: 13px;">Quantity:</label>
+                            <div class="qty-selector">
+                                <% const isClothQty = (product.category === 'kurta-pajama' || product.category === 'waistcoats'); %>
+                                <button type="button" class="qty-btn" id="minus-btn" <%= (isClothQty || product.stock <= 0) ? 'disabled' : '' %>>-</button>
+                                <input type="number" name="quantity" id="qty-input" class="qty-input" value="1" min="1" max="<%= isClothQty ? 0 : product.stock %>" <%= (isClothQty || product.stock <= 0) ? 'readonly' : '' %>>
+                                <button type="button" class="qty-btn" id="plus-btn" <%= (isClothQty || product.stock <= 0) ? 'disabled' : '' %>>+</button>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-add-cart" id="add-cart-submit-btn" <%= product.stock <= 0 ? 'disabled' : '' %>>
+                            <i class="fa-solid fa-bag-shopping"></i> ADD TO CART
+                        </button>
+                    </form>
+
+                    <!-- Add to Wishlist Form -->
+                    <form action="/wishlist/add" method="POST" class="mt-3">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        <input type="hidden" name="productId" value="<%= product._id %>">
+                        <button type="submit" class="btn btn-outline-dark d-inline-flex align-items-center gap-2" style="border-radius: 4px; padding: 10px 20px; font-weight: 600; font-size: 14px; letter-spacing: 0.5px;">
+                            <i class="fa-regular fa-heart"></i> Add to Wishlist
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reviews Section -->
+        <section class="reviews-section">
+            <h2 class="reviews-title">Customer Reviews</h2>
+            
+            <div class="row">
+                <!-- Reviews List -->
+                <div class="col-lg-7">
+                    <% if (reviews.length > 0) { %>
+                        <% reviews.forEach(review => { %>
+                            <div class="review-card">
+                                <div class="review-header">
+                                    <span class="reviewer-name"><%= review.userName %></span>
+                                    <span class="review-date"><%= review.createdAt.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) %></span>
+                                </div>
+                                <div class="review-stars mb-2">
+                                    <% for (let i = 1; i <= 5; i++) { %>
+                                        <i class="<%= i <= review.rating ? 'fa-solid' : 'fa-regular' %> fa-star"></i>
+                                    <% } %>
+                                </div>
+                                <p class="review-text"><%= review.comment %></p>
+                            </div>
+                        <% }) %>
+                    <% } else { %>
+                        <p class="text-muted">No reviews yet for this product. Be the first to leave a review!</p>
+                    <% } %>
+                </div>
+
+                <!-- Write Review -->
+                <div class="col-lg-5">
+                    <div class="write-review-card">
+                        <h3>Write a Review</h3>
+                        <% if (currentUser) { %>
+                            <form action="/products/<%= product._id %>/reviews" method="POST" id="review-form">
+                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                <div class="mb-3">
+                                    <label class="form-label d-block fw-bold">Your Rating</label>
+                                    <div class="rating-select" id="rating-stars-picker">
+                                        <i class="fa-regular fa-star" data-value="1"></i>
+                                        <i class="fa-regular fa-star" data-value="2"></i>
+                                        <i class="fa-regular fa-star" data-value="3"></i>
+                                        <i class="fa-regular fa-star" data-value="4"></i>
+                                        <i class="fa-regular fa-star" data-value="5"></i>
+                                    </div>
+                                    <input type="hidden" name="rating" id="selected-rating" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="review-comment" class="form-label fw-bold">Your Review</label>
+                                    <textarea class="form-control" id="review-comment" name="comment" rows="4" required placeholder="Share your experience with this product..."></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-dark w-100 py-2 fw-bold">SUBMIT REVIEW</button>
+                            </form>
+                        <% } else { %>
+                            <div class="text-center py-3">
+                                <p class="text-muted">You must be logged in to write a review.</p>
+                                <a href="/login" class="btn btn-outline-dark px-4">Log In to Review</a>
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <%- include('partials/footer') %>
+
+    <script>
+        // Sizing logic
+        const sizeButtons = document.querySelectorAll('.size-select-btn');
+        const selectedSizeInput = document.getElementById('selected-size-input');
+        const stockStatusContainer = document.getElementById('stock-status-container');
+        const addCartSubmitBtn = document.getElementById('add-cart-submit-btn');
+        const qtyInput = document.getElementById('qty-input');
+        const minusBtn = document.getElementById('minus-btn');
+        const plusBtn = document.getElementById('plus-btn');
+        
+        let maxVal = qtyInput ? parseInt(qtyInput.max) || 999 : 999;
+
+        // If product needs size, block adding to cart until a size is selected
+        const isClothingProduct = <%= (product.category === 'kurta-pajama' || product.category === 'waistcoats') ? 'true' : 'false' %>;
+        if (isClothingProduct) {
+            if (addCartSubmitBtn) {
+                addCartSubmitBtn.disabled = true;
+                addCartSubmitBtn.classList.add('btn-disabled');
+                addCartSubmitBtn.innerHTML = '<i class="fa-solid fa-circle-exclamation"></i> SELECT A SIZE';
+            }
+        }
+
+        sizeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                // Highlight button
+                sizeButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                // Set selected size
+                const size = btn.getAttribute('data-size');
+                selectedSizeInput.value = size;
+
+                // Update stock indicator
+                const stock = parseInt(btn.getAttribute('data-stock')) || 0;
+                let statusHtml = '';
+                if (stock <= 0) {
+                    statusHtml = '<span class="stock-indicator stock-out"><i class="fa-solid fa-circle-xmark"></i> Out of Stock</span>';
+                    if (addCartSubmitBtn) {
+                        addCartSubmitBtn.disabled = true;
+                        addCartSubmitBtn.classList.add('btn-disabled');
+                        addCartSubmitBtn.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> OUT OF STOCK';
+                    }
+                    if (qtyInput) {
+                        qtyInput.value = 1;
+                        qtyInput.max = 0;
+                        qtyInput.readOnly = true;
+                    }
+                } else {
+                    if (stock <= 5) {
+                        statusHtml = `<span class="stock-indicator stock-low"><i class="fa-solid fa-circle-exclamation"></i> Only ${stock} units left</span>`;
+                    } else {
+                        statusHtml = `<span class="stock-indicator stock-in"><i class="fa-solid fa-circle-check"></i> In Stock (${stock} available)</span>`;
+                    }
+
+                    if (addCartSubmitBtn) {
+                        addCartSubmitBtn.disabled = false;
+                        addCartSubmitBtn.classList.remove('btn-disabled');
+                        addCartSubmitBtn.innerHTML = '<i class="fa-solid fa-bag-shopping"></i> ADD TO CART';
+                    }
+                    if (qtyInput) {
+                        qtyInput.max = stock;
+                        qtyInput.readOnly = false;
+                        maxVal = stock;
+                        if (parseInt(qtyInput.value) > stock) {
+                            qtyInput.value = stock;
+                        }
+                    }
+                }
+                if (stockStatusContainer) {
+                    stockStatusContainer.innerHTML = statusHtml;
+                }
+            });
+        });
+
+        // Quantity selectors logic
+        if(qtyInput && minusBtn && plusBtn) {
+            minusBtn.addEventListener('click', () => {
+                let currentVal = parseInt(qtyInput.value) || 1;
+                if(currentVal > 1) {
+                    qtyInput.value = currentVal - 1;
+                }
+            });
+
+            plusBtn.addEventListener('click', () => {
+                let currentVal = parseInt(qtyInput.value) || 1;
+                if(currentVal < maxVal) {
+                    qtyInput.value = currentVal + 1;
+                }
+            });
+        }
+
+        // Rating picker logic
+        const starsPicker = document.getElementById('rating-stars-picker');
+        const selectedRatingInput = document.getElementById('selected-rating');
+
+        if(starsPicker && selectedRatingInput) {
+            const stars = Array.from(starsPicker.querySelectorAll('i'));
+            
+            stars.forEach(star => {
+                star.addEventListener('click', () => {
+                    const ratingValue = star.getAttribute('data-value');
+                    selectedRatingInput.value = ratingValue;
+                    
+                    // Highlight selected stars
+                    stars.forEach(s => {
+                        const val = s.getAttribute('data-value');
+                        if (val <= ratingValue) {
+                            s.className = 'fa-solid fa-star selected';
+                        } else {
+                            s.className = 'fa-regular fa-star';
+                        }
+                    });
+                });
+            });
+        }
+    </script>
+</body>
+</html>

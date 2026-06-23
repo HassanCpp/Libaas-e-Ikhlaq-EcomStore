@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('partials/head') %>
+    <title>Edit Product | Libas-e-Ikhlaq Admin</title>
+</head>
+<body class="admin-bg">
+
+    <nav class="navbar navbar-expand-lg admin-navbar shadow-sm">
+        <div class="container-fluid px-4 align-items-center">
+            
+            <a href="/admin" class="text-decoration-none d-flex align-items-center gap-3">
+                <img src="/logo.png" alt="Libas e ikhlaq Logo" style="height: 50px;">
+                <div class="d-flex flex-column align-items-center justify-content-center" style="margin-top: 4px;">
+                    <span dir="rtl" style="font-family: 'Noto Nastaliq Urdu', serif; font-size: 20px; color: #333; line-height: 0.8; margin-bottom: 13px;">لباس اخلاق</span>
+                    <span style="font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 2px; color: #333;">
+                        LIBAS-E-IKHLAQ <span style="color: var(--brand-orange);">ADMIN</span>
+                    </span>
+                </div>
+            </a>
+
+            <div class="d-flex gap-4 align-items-center mt-2 mt-lg-0">
+                <a href="/admin" class="btn btn-sm btn-outline-dark" style="border-radius: 2px; font-weight: 600; letter-spacing: 1px;">
+                    <i class="fa-solid fa-arrow-left me-1"></i> BACK TO DASHBOARD
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5 mb-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                
+                <div class="card admin-card p-4 p-md-5">
+                    <div class="pb-3 mb-4 border-bottom">
+                        <h3 class="fw-light m-0" style="color: #111; letter-spacing: 1px;">
+                            <i class="fa-solid fa-pen-to-square me-2" style="color: var(--brand-orange); font-size: 0.8em;"></i>Edit Product
+                        </h3>
+                    </div>
+                    
+                    <% if (error_msg && error_msg.length > 0) { %>
+                        <div class="alert alert-danger border-0 small mb-4" style="background-color: #fff8f7; color: var(--brand-orange);">
+                            <i class="fa-solid fa-circle-exclamation me-2"></i><%= error_msg %>
+                        </div>
+                    <% } %>
+
+                    <form action="/admin/products/edit/<%= product._id %>" method="POST" enctype="multipart/form-data">
+                        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                        
+                        <div class="mb-4">
+                            <label class="form-label text-muted fw-bold" style="font-size: 11px; letter-spacing: 1.5px;">PRODUCT NAME</label>
+                            <input type="text" class="form-control border-0 bg-light py-3" name="name" value="<%= product.name %>" style="border-radius: 2px; font-size: 14px;" required>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label text-muted fw-bold" style="font-size: 11px; letter-spacing: 1.5px;">CATEGORY</label>
+                            <select class="form-select border-0 bg-light py-3" name="category" id="product-category-select" style="border-radius: 2px; font-size: 14px;" required>
+                                <option value="unstitched" <%= product.category === 'unstitched' ? 'selected' : '' %>>Unstitched Fabric</option>
+                                <option value="kurta-pajama" <%= product.category === 'kurta-pajama' ? 'selected' : '' %>>Kurta Pajama</option>
+                                <option value="waistcoats" <%= product.category === 'waistcoats' ? 'selected' : '' %>>Waistcoats</option>
+                                <option value="fragrance" <%= product.category === 'fragrance' ? 'selected' : '' %>>Fragrance</option>
+                                <option value="accessories" <%= product.category === 'accessories' ? 'selected' : '' %>>Accessories</option>
+                            </select>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <label class="form-label text-muted fw-bold" style="font-size: 11px; letter-spacing: 1.5px;">PRICE (PKR)</label>
+                                <input type="number" class="form-control border-0 bg-light py-3" name="price" value="<%= product.price %>" style="border-radius: 2px; font-size: 14px;" required>
+                            </div>
+                            
+                            <div class="col-md-4 mt-4 mt-md-0">
+                                <label class="form-label text-muted fw-bold" style="font-size: 11px; letter-spacing: 1.5px;">DISCOUNT PRICE</label>
+                                <input type="number" class="form-control border-0 bg-light py-3" name="discountPrice" value="<%= product.discountPrice %>" placeholder="Optional" style="border-radius: 2px; font-size: 14px;">
+                            </div>
+
+                            <!-- Flat Stock (hidden for clothing) -->
+                            <div class="col-md-4 mt-4 mt-md-0" id="flat-stock-container">
+                                <label class="form-label text-muted fw-bold" style="font-size: 11px; letter-spacing: 1.5px;">STOCK QUANTITY</label>
+                                <input type="number" class="form-control border-0 bg-light py-3" name="stock" id="flat-stock-input" value="<%= product.stock %>" style="border-radius: 2px; font-size: 14px;" required>
+                            </div>
+                        </div>
+
+                        <!-- Size Stock Inputs (shown only for clothing) -->
+                        <div class="mb-4" id="size-stock-container" style="display: none;">
+                            <label class="form-label text-muted fw-bold" style="font-size: 11px; letter-spacing: 1.5px;">SIZE STOCK QUANTITIES</label>
+                            <div class="row g-2">
+                                <% ['XS', 'S', 'M', 'L', 'XL'].forEach(size => { %>
+                                    <div class="col">
+                                        <label class="small fw-bold text-muted text-center d-block" style="font-size: 10px;"><%= size %></label>
+                                        <input type="number" class="form-control border-0 bg-light text-center py-2 size-stock-input" name="sizes[<%= size %>]" value="<%= product.sizes ? (product.sizes.toObject()[size] || 0) : 0 %>" min="0" style="border-radius: 2px; font-size: 13px;">
+                                    </div>
+                                <% }) %>
+                            </div>
+                            <div class="form-text text-muted small mt-2">Overall stock will be automatically calculated as the sum of these sizes.</div>
+                        </div>
+
+                        <div class="mb-5">
+                          <label class="form-label text-muted fw-bold" style="font-size: 11px; letter-spacing: 1.5px;">UPLOAD NEW IMAGE (Optional)</label>
+                          <input type="file" class="form-control border-0 bg-light py-2 mb-3" name="image" accept="image/*" style="border-radius: 2px; font-size: 14px;">
+
+                             <div class="d-flex align-items-center gap-3 p-3 border rounded" style="background-color: #fafafa;">
+                              <img src="<%= product.image %>" alt="Current Preview" style="width: 70px; height: 70px; object-fit: cover; border-radius: 2px; border: 1px solid #ddd;">
+                            <div>
+                            <span class="d-block small fw-bold text-muted" style="letter-spacing: 1px;">CURRENT IMAGE</span>
+                         </div>
+    </div>
+</div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn admin-btn-primary py-3 fw-bold" style="letter-spacing: 2px; font-size: 13px;">
+                                UPDATE PRODUCT
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+                
+                <p class="text-center mt-4 text-muted small" style="letter-spacing: 1px;">
+                    &copy; 2026 LIBAS-E-IKHLAQ BOUTIQUE MANAGEMENT
+                </p>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const categorySelect = document.getElementById('product-category-select');
+        const flatStockContainer = document.getElementById('flat-stock-container');
+        const sizeStockContainer = document.getElementById('size-stock-container');
+        const flatStockInput = document.getElementById('flat-stock-input');
+        const sizeStockInputs = document.querySelectorAll('.size-stock-input');
+
+        function toggleStockInputs() {
+            const val = categorySelect.value;
+            const isClothing = val === 'kurta-pajama' || val === 'waistcoats';
+            if (isClothing) {
+                flatStockContainer.style.display = 'none';
+                flatStockInput.removeAttribute('required');
+                sizeStockContainer.style.display = 'block';
+                sizeStockInputs.forEach(input => input.setAttribute('required', 'required'));
+            } else {
+                flatStockContainer.style.display = 'block';
+                flatStockInput.setAttribute('required', 'required');
+                sizeStockContainer.style.display = 'none';
+                sizeStockInputs.forEach(input => input.removeAttribute('required'));
+            }
+        }
+
+        if (categorySelect) {
+            categorySelect.addEventListener('change', toggleStockInputs);
+            // Run on load
+            toggleStockInputs();
+        }
+    </script>
+</body>
+</html>

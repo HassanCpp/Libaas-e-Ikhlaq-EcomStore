@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('partials/head') %>
+    <title>Checkout | Libas-e-Ikhlaq</title>
+    <style>
+        .checkout-container {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        .section-header {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 600;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            color: #111;
+        }
+        .order-summary-box {
+            background-color: #fcfcfc;
+            border: 1px solid #eee;
+            border-radius: 6px;
+            padding: 25px;
+            position: sticky;
+            top: 20px;
+        }
+        .checkout-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #f0f0f0;
+            padding: 12px 0;
+            font-size: 14px;
+        }
+        .checkout-item:last-child {
+            border-bottom: none;
+        }
+        .summary-total-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--brand-orange);
+            border-top: 2px solid #eaeaea;
+            padding-top: 15px;
+            margin-top: 15px;
+        }
+        .payment-option {
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .payment-option:hover {
+            border-color: #999;
+            background-color: #fafafa;
+        }
+        .payment-option.active {
+            border-color: #111;
+            background-color: #f7f7f7;
+        }
+        .card-details-box {
+            background-color: #f9f9f9;
+            border: 1px solid #e2e2e2;
+            border-radius: 6px;
+            padding: 20px;
+            margin-top: 10px;
+            display: none;
+        }
+        .mock-card {
+            background: linear-gradient(135deg, #1f1c2c, #928dab);
+            color: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            font-family: 'Courier New', Courier, monospace;
+            letter-spacing: 2px;
+            position: relative;
+            overflow: hidden;
+        }
+        .mock-card::before {
+            content: '';
+            position: absolute;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+            width: 150px;
+            height: 150px;
+            top: -40px;
+            right: -40px;
+        }
+        .mock-card-chip {
+            background: linear-gradient(135deg, #fce38a, #f38181);
+            width: 40px;
+            height: 30px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+        .mock-card-number {
+            font-size: 18px;
+            margin-bottom: 15px;
+            height: 25px;
+        }
+        .mock-card-bottom {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+        }
+        .btn-order {
+            background-color: #111;
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 15px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            border-radius: 4px;
+            margin-top: 25px;
+            transition: all 0.3s;
+        }
+        .btn-order:hover {
+            background-color: var(--brand-orange);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <%- include('partials/header') %>
+    <%- include('partials/nav') %>
+
+    <div class="checkout-container">
+        <h1 class="page-title">Secure Checkout</h1>
+
+        <form action="/checkout" method="POST" id="checkout-form">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <div class="row">
+                <!-- Shipping and Payment Details -->
+                <div class="col-lg-7 mb-4">
+                    
+                    <!-- 1. Shipping Address -->
+                    <div class="mb-5">
+                        <h2 class="section-header">1. SHIPPING ADDRESS</h2>
+                        
+                        <div class="mb-3">
+                            <label for="fullName" class="form-label">Full Name</label>
+                            <input type="text" class="form-control" id="fullName" name="fullName" required placeholder="e.g. Hassan Raza">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="addressLine" class="form-label">Street Address</label>
+                            <input type="text" class="form-control" id="addressLine" name="addressLine" required placeholder="e.g. House 42, Street 3, Sector G-11">
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="city" class="form-label">City</label>
+                                <input type="text" class="form-control" id="city" name="city" required placeholder="e.g. Islamabad">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="postalCode" class="form-label">Postal Code</label>
+                                <input type="text" class="form-control" id="postalCode" name="postalCode" required placeholder="e.g. 44000">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="phone" class="form-label">Phone Number</label>
+                            <input type="tel" class="form-control" id="phone" name="phone" required placeholder="e.g. +92 300 1234567">
+                            <div class="form-text text-muted">For delivery updates and invoice notifications.</div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Payment Method -->
+                    <div>
+                        <h2 class="section-header">2. PAYMENT METHOD</h2>
+                        
+                        <!-- COD Option -->
+                        <div class="payment-option active" id="cod-option-div">
+                            <input class="form-check-input" type="radio" name="paymentMethod" id="payment-cod" value="COD" checked>
+                            <label class="form-check-label fw-bold cursor-pointer" for="payment-cod" style="cursor: pointer; width: 100%;">
+                                Cash on Delivery (COD)
+                                <div class="text-muted fw-normal small mt-1">Pay with cash upon package receipt.</div>
+                            </label>
+                        </div>
+
+                        <!-- Card Option -->
+                        <div class="payment-option" id="card-option-div">
+                            <input class="form-check-input" type="radio" name="paymentMethod" id="payment-card" value="Card">
+                            <label class="form-check-label fw-bold cursor-pointer" for="payment-card" style="cursor: pointer; width: 100%;">
+                                Credit / Debit Card
+                                <div class="text-muted fw-normal small mt-1">Instant secure mock verification swipe.</div>
+                            </label>
+                        </div>
+
+                        <!-- Mock Credit Card Section -->
+                        <div class="card-details-box" id="card-form-fields">
+                            <div class="mock-card mx-auto">
+                                <div class="mock-card-chip"></div>
+                                <div class="mock-card-number" id="card-num-mirror">•••• •••• •••• ••••</div>
+                                <div class="mock-card-bottom">
+                                    <div>
+                                        <div style="font-size: 8px; color: #ccc;">CARDHOLDER</div>
+                                        <div id="card-name-mirror" style="height: 18px; text-transform: uppercase;">YOUR NAME</div>
+                                    </div>
+                                    <div class="text-end">
+                                        <div style="font-size: 8px; color: #ccc;">EXPIRES</div>
+                                        <div id="card-expiry-mirror" style="height: 18px;">MM/YY</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="cardName" class="form-label small fw-bold">Cardholder Name</label>
+                                <input type="text" class="form-control form-control-sm" id="cardName" placeholder="e.g. Hassan Raza">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="cardNumber" class="form-label small fw-bold">Card Number</label>
+                                <input type="text" class="form-control form-control-sm" id="cardNumber" name="cardNumber" placeholder="4242 4242 4242 4242" maxlength="19">
+                            </div>
+
+                            <div class="row">
+                                <div class="col-6 mb-2">
+                                    <label for="cardExpiry" class="form-label small fw-bold">Expiration Date</label>
+                                    <input type="text" class="form-control form-control-sm" id="cardExpiry" placeholder="MM/YY" maxlength="5">
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <label for="cardCvv" class="form-label small fw-bold">CVV Code</label>
+                                    <input type="password" class="form-control form-control-sm" id="cardCvv" placeholder="•••" maxlength="3">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Order Sidebar -->
+                <div class="col-lg-5 mb-4">
+                    <div class="order-summary-box">
+                        <h3 class="section-header">YOUR ORDER</h3>
+                        
+                        <div class="mb-4">
+                            <% cartItems.forEach(item => { %>
+                                <div class="checkout-item">
+                                    <div>
+                                        <span class="fw-bold"><%= item.quantity %>x</span> <%= item.product.name %>
+                                        <% if (item.size) { %>
+                                            <span class="badge bg-secondary ms-1"><%= item.size %></span>
+                                        <% } %>
+                                    </div>
+                                    <div class="text-muted">
+                                        PKR <%= (item.product.price * item.quantity).toLocaleString() %>
+                                    </div>
+                                </div>
+                            <% }) %>
+                        </div>
+
+                        <div class="checkout-item text-muted">
+                            <span>Subtotal</span>
+                            <span>PKR <%= subtotal.toLocaleString() %></span>
+                        </div>
+                        <div class="checkout-item text-muted">
+                            <span>Shipping</span>
+                            <span>FREE</span>
+                        </div>
+                        <div class="summary-total-row">
+                            <span>Total</span>
+                            <span>PKR <%= subtotal.toLocaleString() %></span>
+                        </div>
+
+                        <button type="submit" class="btn-order">
+                            PLACE SECURE ORDER
+                        </button>
+                        
+                        <div class="text-center mt-3 text-muted small">
+                            <i class="fa-solid fa-lock text-success me-1"></i> SSL encrypted transaction system
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <%- include('partials/footer') %>
+
+    <script>
+        // Interactive checkout card details toggling
+        const codOptionDiv = document.getElementById('cod-option-div');
+        const cardOptionDiv = document.getElementById('card-option-div');
+        const rCod = document.getElementById('payment-cod');
+        const rCard = document.getElementById('payment-card');
+        const cardFieldsBox = document.getElementById('card-form-fields');
+
+        function updatePaymentUI() {
+            if (rCod.checked) {
+                codOptionDiv.classList.add('active');
+                cardOptionDiv.classList.remove('active');
+                cardFieldsBox.style.display = 'none';
+                
+                // Remove required flags for validation
+                document.getElementById('cardNumber').removeAttribute('required');
+                document.getElementById('cardName').removeAttribute('required');
+                document.getElementById('cardExpiry').removeAttribute('required');
+                document.getElementById('cardCvv').removeAttribute('required');
+            } else {
+                cardOptionDiv.classList.add('active');
+                codOptionDiv.classList.remove('active');
+                cardFieldsBox.style.display = 'block';
+                
+                // Add required flags for card mode
+                document.getElementById('cardNumber').setAttribute('required', 'required');
+                document.getElementById('cardName').setAttribute('required', 'required');
+                document.getElementById('cardExpiry').setAttribute('required', 'required');
+                document.getElementById('cardCvv').setAttribute('required', 'required');
+            }
+        }
+
+        rCod.addEventListener('change', updatePaymentUI);
+        rCard.addEventListener('change', updatePaymentUI);
+
+        // Credit Card Mirror Mirror logic
+        const cardNameInput = document.getElementById('cardName');
+        const cardNumInput = document.getElementById('cardNumber');
+        const cardExpInput = document.getElementById('cardExpiry');
+
+        const cardNameMirror = document.getElementById('card-name-mirror');
+        const cardNumMirror = document.getElementById('card-num-mirror');
+        const cardExpiryMirror = document.getElementById('card-expiry-mirror');
+
+        cardNameInput.addEventListener('input', (e) => {
+            cardNameMirror.textContent = e.target.value || 'YOUR NAME';
+        });
+
+        cardNumInput.addEventListener('input', (e) => {
+            // Add spaces automatically: 4242 4242 4242 4242
+            let value = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+            let matches = value.match(/\d{4,16}/g);
+            let match = matches && matches[0] || '';
+            let parts = [];
+
+            for (let i=0, len=match.length; i<len; i+=4) {
+                parts.push(match.substring(i, i+4));
+            }
+
+            if (parts.length > 0) {
+                e.target.value = parts.join(' ');
+                cardNumMirror.textContent = parts.join(' ');
+            } else {
+                e.target.value = value;
+                cardNumMirror.textContent = value || '•••• •••• •••• ••••';
+            }
+        });
+
+        cardExpInput.addEventListener('input', (e) => {
+            // Format expiry MM/YY
+            let value = e.target.value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+            if (value.length >= 2) {
+                e.target.value = value.substring(0,2) + '/' + value.substring(2,4);
+            } else {
+                e.target.value = value;
+            }
+            cardExpiryMirror.textContent = e.target.value || 'MM/YY';
+        });
+    </script>
+</body>
+</html>

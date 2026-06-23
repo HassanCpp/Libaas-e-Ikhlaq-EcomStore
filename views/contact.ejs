@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('partials/head') %>
+    <title>Contact Us | Libas-e-Ikhlaq</title>
+</head>
+<body>
+
+    <%- include('partials/header') %>
+
+    <nav class="top-nav">
+        <div class="hamburger" id="hamburger-menu">
+            <i class="fa-solid fa-bars"></i>
+        </div>
+        
+        <ul id="nav-links">
+            <li><a href="/">HOME</a></li>
+            <li><a href="/products?category=unstitched">UNSTITCHED</a></li>
+            <li><a href="/products?category=kurta-pajama">KURTA PAJAMA</a></li>
+            <li><a href="/products?category=waistcoats">WAISTCOATS</a></li>
+            <li><a href="/products?category=fragrance">FRAGRANCE</a></li>
+            <li><a href="/contact-us" class="highlight">CONTACT US</a></li>
+        </ul>
+    </nav>
+
+    <section class="info-hero" style="padding: 60px 50px;">
+        <h1 style="text-align: center;">Contact Us</h1>
+        <p style="text-align: center;">Have questions? We'd love to hear from you. Reach out to us anytime!</p>
+    </section>
+
+    <section class="products-section">
+        <h2>Get In Touch</h2>
+        
+        <div style="max-width: 600px; margin: 0 auto; text-align: center;">
+            <p style="font-size: 18px; margin-bottom: 30px;">
+                <i class="fa-solid fa-envelope" style="color: var(--brand-orange);"></i><br>
+                <strong>Email:</strong> support@libaseikhlaq.com
+            </p>
+            <p style="font-size: 18px; margin-bottom: 30px;">
+                <i class="fa-solid fa-phone" style="color: var(--brand-orange);"></i><br>
+                <strong>Phone:</strong> +92 300 1234567
+            </p>
+            <p style="font-size: 18px;">
+                <i class="fa-solid fa-location-dot" style="color: var(--brand-orange);"></i><br>
+                <strong>Location:</strong> Lahore, Pakistan
+            </p>
+        </div>
+    </section>
+
+    <%- include('partials/footer') %>
+
+
+</body>
+</html>

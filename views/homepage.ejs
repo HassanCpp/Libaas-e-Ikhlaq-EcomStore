@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Libas-e-Ikhlaq | Men's Clothing</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="/js/script.js" defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <%- include('partials/header') %>
+    <%- include('partials/nav') %>
+
+    <section class="info-hero">
+        <h1 dir="rtl">لباس جوبنےآپ کی شناخت</h1>
+        <p>Discover our premium range of unstitched fabrics, signature fragrances, and curated accessories designed to elevate your everyday style.</p>
+        <button class="btn-primary">View Collections</button>
+    </section>
+
+    <section class="carousel-section">
+        
+        <div class="carousel-wrapper" id="heroCarousel">
+            
+            <div class="carousel-slide slide-1">
+                <div class="carousel-content">
+                    <h2>WINTER CLEARANCE SALE</h2>
+                    <p>FLAT 25% & 50% OFF on Selected Items</p>
+                    <button class="btn-dark">Shop The Sale</button>
+                </div>
+            </div>
+
+            <div class="carousel-slide slide-2">
+                <div class="carousel-content dark-text-content">
+                    <h2>THE SPRING / SUMMER '26 EDIT</h2>
+                    <p>Step into the new season with our lightweight, breathable fabrics.</p>
+                    <button class="btn-dark">Explore New Arrivals</button>
+                </div>
+            </div>
+
+            <div class="carousel-slide slide-3">
+                <div class="carousel-content">
+                    <h2>MASTER THE ART OF BESPOKE</h2>
+                    <p>Premium Egyptian cottons and wash-and-wear fabrics.</p>
+                    <button class="btn-dark">Shop Unstitched</button>
+                </div>
+            </div>
+
+            <div class="carousel-slide slide-4">
+                <div class="carousel-content">
+                    <h2>LEAVE A LASTING IMPRESSION</h2>
+                    <p>Complete your attire with our signature men's fragrances.</p>
+                    <button class="btn-dark">Discover Fragrances</button>
+                </div>
+            </div>
+
+        </div>
+
+        </div> <div class="carousel-dots" id="carouselDots"></div>
+
+    </section> 
+
+
+    <section class="products-section">
+        <h2>LATEST ARRIVALS</h2>
+        
+        <div class="product-grid">
+            
+            <div class="product-card">
+                <div class="product-image-container">
+                    <img src="/washnwear-premium.png" alt="Premium Unstitched" class="product-image">
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name">Premium Wash & Wear</h3>
+                    <p class="product-price">Rs. 4,500</p>
+                    <a href="/products" class="add-to-cart-btn" style="display:block;text-align:center;text-decoration:none;">
+                        <i class="fa-solid fa-cart-shopping"></i> View Collection
+                    </a>
+                </div>
+            </div>
+
+            <div class="product-card">
+                <div class="product-image-container">
+                    <img src="/classicblack-wc.png" alt="black wc" class="product-image">
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name">Black Waistcoat</h3>
+                    <p class="product-price">Rs. 6,800</p>
+                    <button class="add-to-cart-btn">
+                        <i class="fa-solid fa-cart-shopping"></i> Add to Cart
+                    </button>
+                </div>
+            </div>
+
+            <div class="product-card">
+                <div class="product-image-container">
+                    <img src="/zarar.png" alt="Signature Fragrance" class="product-image">
+                </div>
+                <div class="product-info">
+                    <h3 class="product-name">J. Zarar Eau De Parfum</h3>
+                    <p class="product-price">Rs. 4,800</p>
+                    <button class="add-to-cart-btn">
+                        <i class="fa-solid fa-cart-shopping"></i> Add to Cart
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </section>
+    <section class="testimonials-section">
+        <h2>WHAT OUR CLIENTS SAY</h2>
+        
+        <div class="testimonials-grid">
+            <div class="testimonial-card">
+                <div class="stars">
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                </div>
+                <p class="quote">"The premium Egyptian cotton is exactly as described. The fabric feels incredibly soft and drapes perfectly after tailoring. Highly recommended."</p>
+                <p class="customer-name">- Ahmed R.</p>
+            </div>
+
+            <div class="testimonial-card">
+                <div class="stars">
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                </div>
+                <p class="quote">"I ordered the wash-and-wear unstitched fabric for daily office use. The quality is outstanding and the delivery was very prompt."</p>
+                <p class="customer-name">- Salman T.</p>
+            </div>
+
+            <div class="testimonial-card">
+                <div class="stars">
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star"></i>
+                    <i class="fa-solid fa-star-half-stroke"></i>
+                </div>
+                <p class="quote">"Oud E Khaas has become my new signature scent. It lasts all day and has a very rich, traditional profile without being overpowering."</p>
+                <p class="customer-name">- Usman K.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="newsletter-section">
+        <div class="newsletter-content">
+            <h2>JOIN THE CLUB</h2>
+            <p>Subscribe to our newsletter to receive exclusive offers, early access to new collections, and 10% off your first unstitched order.</p>
+            
+            <form class="newsletter-form" action="/newsletter/subscribe" method="POST">
+                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                <input type="email" name="email" placeholder="Enter your email address" required>
+                <button type="submit" class="btn-subscribe">Subscribe</button>
+            </form>
+        </div>
+    </section>
+    <%- include('partials/footer') %>
+
+</body>
+</html>
