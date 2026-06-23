@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const User = require('./Models/User');
+const User = require('./models/User');
 
 const dbUri = 'mongodb://127.0.0.1:27017/libaseikhlaq';
 mongoose.connect(dbUri)
