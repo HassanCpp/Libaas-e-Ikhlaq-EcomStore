@@ -2,6 +2,8 @@ const Product = require('../models/Product');
 const Order = require('../models/Order');
 const Review = require('../models/Review');
 const User = require('../models/User');
+const Coupon = require('../models/Coupon');
+const PDFDocument = require('pdfkit');
 const nodemailer = require('nodemailer');
 
 // Helper to escape special regex characters for search safety (ReDoS protection)
@@ -78,7 +80,26 @@ const sendConfirmationEmail = async (order) => {
     }
 };
 
-const renderHomepage = (req, res) => res.render('homepage');
+const renderHomepage = async (req, res) => {
+    try {
+        const newArrivals = await Product.find({}).sort({ createdAt: -1 }).limit(4);
+        
+        // Fetch up to 4 discounted products. If less than 4, fill remaining slots with top-rated ones.
+        let featuredOffers = await Product.find({ discountPrice: { $ne: null, $gt: 0 } }).limit(4);
+        if (featuredOffers.length < 4) {
+            const excludeIds = featuredOffers.map(p => p._id);
+            const additional = await Product.find({ _id: { $nin: excludeIds } })
+                .sort({ rating: -1 })
+                .limit(4 - featuredOffers.length);
+            featuredOffers = [...featuredOffers, ...additional];
+        }
+        
+        res.render('homepage', { newArrivals, featuredOffers });
+    } catch (err) {
+        console.error('Error rendering homepage:', err);
+        res.status(500).render('error', { message: 'Failed to load the homepage.' });
+    }
+};
 
 const renderContact = (req, res) => res.render('contact');
 
@@ -126,9 +147,22 @@ const getProductDetail = async (req, res) => {
 
         const reviews = await Review.find({ product: product._id }).sort({ createdAt: -1 });
         
+        // Fetch up to 4 related products in the same category, excluding the current product
+        let relatedProducts = await Product.find({ category: product.category, _id: { $ne: product._id } }).limit(4);
+        
+        // Fallback: If less than 4 items, fill remaining slots with other top-rated products
+        if (relatedProducts.length < 4) {
+            const excludeIds = [product._id, ...relatedProducts.map(p => p._id)];
+            const additional = await Product.find({ _id: { $nin: excludeIds } })
+                .sort({ rating: -1 })
+                .limit(4 - relatedProducts.length);
+            relatedProducts = [...relatedProducts, ...additional];
+        }
+
         res.render('product-detail', { 
             product, 
-            reviews 
+            reviews,
+            relatedProducts
         });
     } catch (err) {
         console.error(err);
@@ -420,7 +454,28 @@ const renderCheckout = async (req, res) => {
             }
         }
 
-        res.render('checkout', { cartItems, subtotal });
+        let discountAmount = 0;
+        let couponApplied = null;
+
+        if (req.session.coupon) {
+            const sessionCoupon = req.session.coupon;
+            const coupon = await Coupon.findOne({ code: sessionCoupon.code, isActive: true });
+            if (coupon && coupon.expiryDate >= new Date() && subtotal >= coupon.minOrderAmount) {
+                couponApplied = coupon;
+                if (coupon.discountType === 'percentage') {
+                    discountAmount = Math.round(subtotal * (coupon.discountAmount / 100));
+                } else {
+                    discountAmount = coupon.discountAmount;
+                }
+                discountAmount = Math.min(discountAmount, subtotal);
+            } else {
+                req.session.coupon = null;
+            }
+        }
+
+        const totalAmount = subtotal - discountAmount;
+
+        res.render('checkout', { cartItems, subtotal, discountAmount, couponApplied, totalAmount });
     } catch (err) {
         console.error(err);
         res.status(500).render('error', { message: 'Failed to load checkout details.' });
@@ -527,6 +582,26 @@ const processCheckout = async (req, res) => {
             return res.redirect('/cart');
         }
 
+        // Apply coupon discount if applicable
+        let discountAmount = 0;
+        let appliedCouponCode = null;
+
+        if (req.session.coupon) {
+            const sessionCoupon = req.session.coupon;
+            const coupon = await Coupon.findOne({ code: sessionCoupon.code, isActive: true });
+            if (coupon && coupon.expiryDate >= new Date() && totalAmount >= coupon.minOrderAmount) {
+                appliedCouponCode = coupon.code;
+                if (coupon.discountType === 'percentage') {
+                    discountAmount = Math.round(totalAmount * (coupon.discountAmount / 100));
+                } else {
+                    discountAmount = coupon.discountAmount;
+                }
+                discountAmount = Math.min(discountAmount, totalAmount);
+            }
+        }
+
+        const finalTotalAmount = totalAmount - discountAmount;
+
         const isCardPaid = paymentMethod === 'Card';
         const transactionId = isCardPaid ? 'TXN-' + Date.now() + Math.floor(Math.random() * 1000) : null;
 
@@ -537,7 +612,9 @@ const processCheckout = async (req, res) => {
             paymentMethod,
             paymentStatus: isCardPaid ? 'Paid' : 'Pending',
             orderStatus: isCardPaid ? 'Processing' : 'Pending',
-            totalAmount,
+            discountAmount,
+            couponCode: appliedCouponCode,
+            totalAmount: finalTotalAmount,
             transactionId
         });
 
@@ -557,6 +634,9 @@ const processCheckout = async (req, res) => {
 
         // Empty session cart
         req.session.cart = [];
+
+        // Clear coupon from session
+        req.session.coupon = null;
 
         // Run notification delivery asynchronously
         sendConfirmationEmail(newOrder);
@@ -770,6 +850,182 @@ const getMyOrders = async (req, res) => {
     }
 };
 
+// POST apply coupon code (AJAX)
+const applyCoupon = async (req, res) => {
+    try {
+        const { couponCode } = req.body;
+        if (!couponCode) {
+            return res.json({ success: false, message: 'Please enter a coupon code.' });
+        }
+
+        const coupon = await Coupon.findOne({ code: couponCode.toUpperCase(), isActive: true });
+        if (!coupon) {
+            return res.json({ success: false, message: 'Invalid or inactive coupon code.' });
+        }
+
+        if (coupon.expiryDate < new Date()) {
+            return res.json({ success: false, message: 'This coupon code has expired.' });
+        }
+
+        // Calculate current cart subtotal
+        const cart = req.session.cart || [];
+        let subtotal = 0;
+        for (let item of cart) {
+            const product = await Product.findById(item.productId);
+            if (product) {
+                const activePrice = (product.discountPrice && product.discountPrice > 0 && product.discountPrice < product.price) ? product.discountPrice : product.price;
+                subtotal += activePrice * item.quantity;
+            }
+        }
+
+        if (subtotal < coupon.minOrderAmount) {
+            return res.json({
+                success: false,
+                message: `Minimum order amount of Rs. ${coupon.minOrderAmount} is required to apply this coupon.`
+            });
+        }
+
+        // Calculate discount
+        let discountAmount = 0;
+        if (coupon.discountType === 'percentage') {
+            discountAmount = Math.round(subtotal * (coupon.discountAmount / 100));
+        } else if (coupon.discountType === 'flat') {
+            discountAmount = coupon.discountAmount;
+        }
+
+        discountAmount = Math.min(discountAmount, subtotal);
+        const finalTotal = subtotal - discountAmount;
+
+        // Store coupon in session
+        req.session.coupon = {
+            code: coupon.code,
+            discountType: coupon.discountType,
+            discountAmount: coupon.discountAmount,
+            minOrderAmount: coupon.minOrderAmount
+        };
+
+        res.json({
+            success: true,
+            message: 'Coupon applied successfully!',
+            couponCode: coupon.code,
+            discountAmount,
+            finalTotal
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: 'Server error while applying coupon.' });
+    }
+};
+
+// GET Download Order Invoice (PDF)
+const downloadInvoice = async (req, res) => {
+    try {
+        const order = await Order.findById(req.params.id);
+        if (!order) return res.status(404).render('error', { message: 'Order not found.' });
+
+        // Access Control Verification:
+        const isUserAdmin = req.session.user && req.session.user.role === 'admin';
+        if (order.user) {
+            const isOwner = req.session.user && req.session.user.id === order.user.toString();
+            if (!isOwner && !isUserAdmin) {
+                return res.status(403).render('error', { message: 'Access denied. You do not have permission to download this invoice.' });
+            }
+        } else {
+            const isLastPlaced = req.session.lastPlacedOrderId === order._id.toString();
+            if (!isLastPlaced && !isUserAdmin) {
+                return res.status(403).render('error', { message: 'Access denied. You do not have permission to download this invoice.' });
+            }
+        }
+
+        const doc = new PDFDocument({ margin: 50 });
+        
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=invoice_${order._id}.pdf`);
+        
+        doc.pipe(res);
+
+        // Header Section
+        doc.fillColor('#E85624').fontSize(24).text('LIBAS-E-IKHLAQ', { align: 'left' });
+        doc.fillColor('#777777').fontSize(10).text('Premium Eastern Apparel Store', { align: 'left' });
+        
+        doc.moveDown();
+        
+        doc.fillColor('#333333').fontSize(14).text('INVOICE', { align: 'right' });
+        doc.fontSize(10).text(`Invoice Number: INV-${order._id.toString().substring(0, 8).toUpperCase()}`, { align: 'right' });
+        doc.text(`Order Date: ${new Date(order.createdAt).toLocaleDateString()}`, { align: 'right' });
+        
+        doc.moveDown(2);
+        
+        // Shipping Details
+        doc.fillColor('#E85624').fontSize(12).text('BILL TO:', { underline: true });
+        doc.fillColor('#333333').fontSize(10);
+        doc.text(`Name: ${order.shippingAddress.fullName}`);
+        doc.text(`Address: ${order.shippingAddress.addressLine}`);
+        doc.text(`City: ${order.shippingAddress.city}`);
+        doc.text(`Postal Code: ${order.shippingAddress.postalCode}`);
+        doc.text(`Phone: ${order.shippingAddress.phone}`);
+        
+        doc.moveDown(2);
+
+        // Table Header
+        const startY = doc.y;
+        doc.fillColor('#E85624').fontSize(10);
+        doc.text('Item Description', 50, startY);
+        doc.text('Size', 250, startY);
+        doc.text('Price', 320, startY, { width: 60, align: 'right' });
+        doc.text('Qty', 400, startY, { width: 40, align: 'right' });
+        doc.text('Total', 460, startY, { width: 80, align: 'right' });
+        
+        doc.moveTo(50, startY + 15).lineTo(540, startY + 15).strokeColor('#E85624').stroke();
+        
+        let currentY = startY + 25;
+        doc.fillColor('#333333');
+        
+        let subtotal = 0;
+        for (let item of order.items) {
+            doc.text(item.name, 50, currentY, { width: 190 });
+            doc.text(item.size || 'N/A', 250, currentY);
+            doc.text(`Rs. ${item.price}`, 320, currentY, { width: 60, align: 'right' });
+            doc.text(item.quantity.toString(), 400, currentY, { width: 40, align: 'right' });
+            const itemTotal = item.price * item.quantity;
+            doc.text(`Rs. ${itemTotal}`, 460, currentY, { width: 80, align: 'right' });
+            subtotal += itemTotal;
+            currentY += 20;
+        }
+        
+        doc.moveTo(50, currentY).lineTo(540, currentY).strokeColor('#dddddd').stroke();
+        currentY += 15;
+        
+        // Summary
+        doc.text('Subtotal:', 350, currentY, { width: 110, align: 'right' });
+        doc.text(`Rs. ${subtotal}`, 460, currentY, { width: 80, align: 'right' });
+        currentY += 15;
+
+        if (order.discountAmount && order.discountAmount > 0) {
+            doc.text(`Discount (${order.couponCode || 'Promo'}):`, 300, currentY, { width: 160, align: 'right' });
+            doc.text(`-Rs. ${order.discountAmount}`, 460, currentY, { width: 80, align: 'right' });
+            currentY += 15;
+        }
+
+        doc.fillColor('#E85624').fontSize(11).text('Grand Total:', 350, currentY, { width: 110, align: 'right' });
+        doc.text(`Rs. ${order.totalAmount}`, 460, currentY, { width: 80, align: 'right' });
+        
+        doc.moveDown(4);
+        doc.fillColor('#777777').fontSize(10).text('Thank you for shopping with Libas-e-Ikhlaq!', { align: 'center', italic: true });
+        
+        doc.end();
+    } catch (err) {
+        console.error(err);
+        res.status(500).render('error', { message: 'Failed to generate invoice.' });
+    }
+};
+
+// POST remove coupon code (AJAX)
+const removeCoupon = async (req, res) => {
+    req.session.coupon = null;
+    res.json({ success: true, message: 'Coupon removed successfully!' });
+};
+
 module.exports = {
     renderHomepage,
     renderContact,
@@ -787,5 +1043,8 @@ module.exports = {
     addToWishlist,
     removeFromWishlist,
     subscribeNewsletter,
-    getMyOrders
+    getMyOrders,
+    applyCoupon,
+    removeCoupon,
+    downloadInvoice
 };

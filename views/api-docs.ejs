@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('partials/head') %>
+    <title>API Documentation | Libas-e-Ikhlaq</title>
+    <style>
+        .api-docs-container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 20px;
+            font-family: 'Montserrat', sans-serif;
+        }
+        .api-header {
+            border-bottom: 2px solid var(--brand-orange);
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+        .api-title {
+            color: #333;
+            font-weight: 700;
+        }
+        .api-subtitle {
+            color: #777;
+            font-size: 14px;
+        }
+        .endpoint-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .endpoint-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+        }
+        .endpoint-header {
+            padding: 12px 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .endpoint-post {
+            background-color: rgba(40, 167, 69, 0.08);
+            border-left: 5px solid #28a745;
+        }
+        .endpoint-get {
+            background-color: rgba(0, 123, 255, 0.08);
+            border-left: 5px solid #007bff;
+        }
+        .method-badge {
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #fff;
+            text-transform: uppercase;
+        }
+        .method-post {
+            background-color: #28a745;
+        }
+        .method-get {
+            background-color: #007bff;
+        }
+        .endpoint-path {
+            font-family: monospace;
+            font-size: 15px;
+            color: #333;
+            margin-left: 10px;
+            font-weight: bold;
+        }
+        .endpoint-body {
+            padding: 20px;
+            background-color: #fff;
+        }
+        pre {
+            background-color: #272822;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 6px;
+            font-size: 13px;
+            overflow-x: auto;
+            margin-bottom: 0;
+        }
+        .auth-note {
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        .param-table th {
+            background-color: #f8f9fa;
+        }
+        .param-table td, .param-table th {
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+
+    <%- include('partials/header') %>
+
+    <nav class="top-nav">
+        <div class="hamburger" id="hamburger-menu">
+            <i class="fa-solid fa-bars"></i>
+        </div>
+        
+        <ul id="nav-links">
+            <li><a href="/">HOME</a></li>
+            <li><a href="/products?category=unstitched">UNSTITCHED</a></li>
+            <li><a href="/products?category=kurta-pajama">KURTA PAJAMA</a></li>
+            <li><a href="/products?category=waistcoats">WAISTCOATS</a></li>
+            <li><a href="/products?category=fragrance">FRAGRANCE</a></li>
+            <li><a href="/contact-us">CONTACT US</a></li>
+        </ul>
+    </nav>
+
+    <div class="api-docs-container">
+        <div class="api-header text-center">
+            <h1 class="api-title">Developer API Portal</h1>
+            <p class="api-subtitle">Integrate Libas-e-Ikhlaq e-commerce services into your client systems and storefronts.</p>
+        </div>
+
+        <div class="auth-note d-flex align-items-center">
+            <i class="fa-solid fa-circle-info fa-2x me-3"></i>
+            <div>
+                <strong>Authentication Requirement:</strong> Protected endpoints require stateless JSON Web Tokens (JWT). Pass the token in the request header as <code>Authorization: Bearer &lt;your_jwt_token&gt;</code>.
+            </div>
+        </div>
+
+        <h3 class="mb-4">API Endpoints</h3>
+
+        <!-- POST Auth Login -->
+        <div class="endpoint-card">
+            <div class="endpoint-header endpoint-post">
+                <div>
+                    <span class="method-badge method-post">POST</span>
+                    <span class="endpoint-path">/api/v1/auth/login</span>
+                </div>
+                <span class="text-muted fs-7">Authenticate client credentials</span>
+            </div>
+            <div class="endpoint-body">
+                <h6>Request Body</h6>
+                <table class="table table-bordered param-table mb-3">
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Type</th>
+                            <th>Required</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>email</code></td>
+                            <td>String</td>
+                            <td>Yes</td>
+                            <td>Registered user email.</td>
+                        </tr>
+                        <tr>
+                            <td><code>password</code></td>
+                            <td>String</td>
+                            <td>Yes</td>
+                            <td>User account password.</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h6 class="mt-3">Response Preview (200 OK)</h6>
+                <pre><code>{
+  "success": true,
+  "message": "Login successful",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}</code></pre>
+            </div>
+        </div>
+
+        <!-- GET Products -->
+        <div class="endpoint-card">
+            <div class="endpoint-header endpoint-get">
+                <div>
+                    <span class="method-badge method-get">GET</span>
+                    <span class="endpoint-path">/api/v1/products</span>
+                </div>
+                <span class="text-muted fs-7">Retrieve product catalog listings</span>
+            </div>
+            <div class="endpoint-body">
+                <h6>Query Parameters</h6>
+                <table class="table table-bordered param-table mb-3">
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Type</th>
+                            <th>Required</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>page</code></td>
+                            <td>Number</td>
+                            <td>No</td>
+                            <td>Pagination page index (default: <code>1</code>).</td>
+                        </tr>
+                        <tr>
+                            <td><code>limit</code></td>
+                            <td>Number</td>
+                            <td>No</td>
+                            <td>Number of items per page (default: <code>10</code>).</td>
+                        </tr>
+                        <tr>
+                            <td><code>category</code></td>
+                            <td>String</td>
+                            <td>No</td>
+                            <td>Filter by category (e.g., <code>unstitched</code>, <code>kurta-pajama</code>).</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h6 class="mt-3">Response Preview (200 OK)</h6>
+                <pre><code>{
+  "success": true,
+  "count": 1,
+  "data": [
+    {
+      "_id": "603f9e9a4f1a4e2ef0d30c5e",
+      "name": "Premium Wash & Wear",
+      "price": 4500,
+      "category": "unstitched",
+      "stock": 25,
+      "rating": 4.8,
+      "image": "/washnwear-premium.png"
+    }
+  ]
+}</code></pre>
+            </div>
+        </div>
+
+        <!-- GET Autocomplete -->
+        <div class="endpoint-card">
+            <div class="endpoint-header endpoint-get">
+                <div>
+                    <span class="method-badge method-get">GET</span>
+                    <span class="endpoint-path">/api/v1/search-autocomplete</span>
+                </div>
+                <span class="text-muted fs-7">Real-time search suggestions</span>
+            </div>
+            <div class="endpoint-body">
+                <h6>Query Parameters</h6>
+                <table class="table table-bordered param-table mb-3">
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Type</th>
+                            <th>Required</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>q</code></td>
+                            <td>String</td>
+                            <td>Yes</td>
+                            <td>The query string (minimum length of 2 characters required).</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h6 class="mt-3">Response Preview (200 OK)</h6>
+                <pre><code>{
+  "success": true,
+  "count": 1,
+  "data": [
+    {
+      "_id": "603f9e9a4f1a4e2ef0d30c5e",
+      "name": "Premium Wash & Wear",
+      "price": 4500,
+      "discountPrice": 4000,
+      "category": "unstitched",
+      "image": "/washnwear-premium.png"
+    }
+  ]
+}</code></pre>
+            </div>
+        </div>
+
+        <!-- POST Create Order -->
+        <div class="endpoint-card">
+            <div class="endpoint-header endpoint-post">
+                <div>
+                    <span class="method-badge method-post">POST</span>
+                    <span class="endpoint-path">/api/v1/orders</span>
+                </div>
+                <span class="text-muted fs-7">Place a new order (Secure)</span>
+            </div>
+            <div class="endpoint-body">
+                <div class="alert alert-info py-2 fs-7 mb-3">
+                    <i class="fa-solid fa-lock me-2"></i> This endpoint is JWT-protected. Put the token in the <code>Authorization</code> header.
+                </div>
+                <h6>Request Body</h6>
+                <table class="table table-bordered param-table mb-3">
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Type</th>
+                            <th>Required</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>items</code></td>
+                            <td>Array</td>
+                            <td>Yes</td>
+                            <td>List of cart items. Format: <code>[ { "productId": "id", "quantity": 1, "size": "M" } ]</code>.</td>
+                        </tr>
+                        <tr>
+                            <td><code>shippingAddress</code></td>
+                            <td>Object</td>
+                            <td>Yes</td>
+                            <td>Address object containing <code>fullName</code>, <code>addressLine</code>, <code>city</code>, <code>postalCode</code>, <code>phone</code>.</td>
+                        </tr>
+                        <tr>
+                            <td><code>paymentMethod</code></td>
+                            <td>String</td>
+                            <td>Yes</td>
+                            <td>Either <code>COD</code> (Cash on Delivery) or <code>Card</code>.</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <h6 class="mt-3">Response Preview (201 Created)</h6>
+                <pre><code>{
+  "success": true,
+  "message": "Order placed successfully!",
+  "data": {
+    "_id": "603f9fef4f1a4e2ef0d30c6a",
+    "user": "603f9e9a4f1a4e2ef0d30c5d",
+    "items": [
+      {
+        "product": "603f9e9a4f1a4e2ef0d30c5e",
+        "name": "Premium Wash & Wear",
+        "price": 4500,
+        "quantity": 1,
+        "size": null
+      }
+    ],
+    "shippingAddress": {
+      "fullName": "Jane Doe",
+      "addressLine": "House 123, Street 5",
+      "city": "Lahore",
+      "postalCode": "54000",
+      "phone": "03001234567"
+    },
+    "paymentMethod": "COD",
+    "paymentStatus": "Pending",
+    "orderStatus": "Pending",
+    "totalAmount": 4500,
+    "createdAt": "2026-06-25T01:00:00.000Z"
+  }
+}</code></pre>
+            </div>
+        </div>
+
+    </div>
+
+    <%- include('partials/footer') %>
+
+</body>
+</html>

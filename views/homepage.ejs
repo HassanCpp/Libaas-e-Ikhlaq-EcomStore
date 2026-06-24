@@ -66,49 +66,94 @@
 
 
     <section class="products-section">
-        <h2>LATEST ARRIVALS</h2>
-        
+        <h2 style="font-family: 'Montserrat', sans-serif; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #111; margin-bottom: 30px; text-align: center;">NEW ARRIVALS</h2>
         <div class="product-grid">
-            
-            <div class="product-card">
-                <div class="product-image-container">
-                    <img src="/washnwear-premium.png" alt="Premium Unstitched" class="product-image">
+            <% newArrivals.forEach(product => { %>
+                <div class="product-card">
+                    <div class="product-image-container">
+                        <a href="/products/<%= product._id %>">
+                            <img src="<%= product.image %>" alt="<%= product.name %>" class="product-image">
+                        </a>
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-name">
+                            <a href="/products/<%= product._id %>" style="text-decoration: none; color: inherit;">
+                                <%= product.name %>
+                            </a>
+                        </h3>
+                        <p class="product-price">
+                            <% if (product.discountPrice && product.discountPrice > 0 && product.discountPrice < product.price) { %>
+                                <span class="text-muted text-decoration-line-through me-2" style="font-size: 0.85em; font-weight: normal; color: #888; text-decoration: line-through;">PKR <%= product.price.toLocaleString() %></span>
+                                <span style="color: var(--brand-orange); font-weight: 700;">PKR <%= product.discountPrice.toLocaleString() %></span>
+                            <% } else { %>
+                                PKR <%= product.price.toLocaleString() %>
+                            <% } %>
+                        </p>
+                        <% if (product.category === 'kurta-pajama' || product.category === 'waistcoats') { %>
+                            <a href="/products/<%= product._id %>" class="add-to-cart-btn text-decoration-none" style="display:block; text-align:center; font-weight:bold;">
+                                <i class="fa-solid fa-ruler-combined"></i> SELECT SIZE
+                            </a>
+                        <% } else { %>
+                            <form action="/cart/add" method="POST" style="width: 100%;">
+                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                <input type="hidden" name="productId" value="<%= product._id %>">
+                                <input type="hidden" name="quantity" value="1">
+                                <button type="submit" class="add-to-cart-btn w-100" style="font-weight:bold; cursor:pointer;">
+                                    <i class="fa-solid fa-cart-shopping"></i> ADD TO CART
+                                </button>
+                            </form>
+                        <% } %>
+                    </div>
                 </div>
-                <div class="product-info">
-                    <h3 class="product-name">Premium Wash & Wear</h3>
-                    <p class="product-price">Rs. 4,500</p>
-                    <a href="/products" class="add-to-cart-btn" style="display:block;text-align:center;text-decoration:none;">
-                        <i class="fa-solid fa-cart-shopping"></i> View Collection
-                    </a>
-                </div>
-            </div>
+            <% }) %>
+        </div>
+    </section>
 
-            <div class="product-card">
-                <div class="product-image-container">
-                    <img src="/classicblack-wc.png" alt="black wc" class="product-image">
+    <section class="products-section" style="background-color: #fcfcfc; border-top: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; padding: 60px 5%;">
+        <h2 style="font-family: 'Montserrat', sans-serif; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: #111; margin-bottom: 30px; text-align: center;">SPECIAL OFFERS</h2>
+        <div class="product-grid">
+            <% featuredOffers.forEach(product => { %>
+                <div class="product-card" style="position: relative;">
+                    <% if (product.discountPrice && product.discountPrice > 0 && product.discountPrice < product.price) { %>
+                        <% const pct = Math.round(((product.price - product.discountPrice) / product.price) * 100); %>
+                        <div class="sale-badge" style="position: absolute; top: 10px; left: 10px; background-color: var(--brand-orange); color: #fff; padding: 4px 8px; font-size: 11px; font-weight: 700; border-radius: 4px; z-index: 10; letter-spacing: 0.5px;">SAVE <%= pct %>%</div>
+                    <% } %>
+                    <div class="product-image-container">
+                        <a href="/products/<%= product._id %>">
+                            <img src="<%= product.image %>" alt="<%= product.name %>" class="product-image">
+                        </a>
+                    </div>
+                    <div class="product-info">
+                        <h3 class="product-name">
+                            <a href="/products/<%= product._id %>" style="text-decoration: none; color: inherit;">
+                                <%= product.name %>
+                            </a>
+                        </h3>
+                        <p class="product-price">
+                            <% if (product.discountPrice && product.discountPrice > 0 && product.discountPrice < product.price) { %>
+                                <span class="text-muted text-decoration-line-through me-2" style="font-size: 0.85em; font-weight: normal; color: #888; text-decoration: line-through;">PKR <%= product.price.toLocaleString() %></span>
+                                <span style="color: var(--brand-orange); font-weight: 700;">PKR <%= product.discountPrice.toLocaleString() %></span>
+                            <% } else { %>
+                                PKR <%= product.price.toLocaleString() %>
+                            <% } %>
+                        </p>
+                        <% if (product.category === 'kurta-pajama' || product.category === 'waistcoats') { %>
+                            <a href="/products/<%= product._id %>" class="add-to-cart-btn text-decoration-none" style="display:block; text-align:center; font-weight:bold;">
+                                <i class="fa-solid fa-ruler-combined"></i> SELECT SIZE
+                            </a>
+                        <% } else { %>
+                            <form action="/cart/add" method="POST" style="width: 100%;">
+                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                <input type="hidden" name="productId" value="<%= product._id %>">
+                                <input type="hidden" name="quantity" value="1">
+                                <button type="submit" class="add-to-cart-btn w-100" style="font-weight:bold; cursor:pointer;">
+                                    <i class="fa-solid fa-cart-shopping"></i> ADD TO CART
+                                </button>
+                            </form>
+                        <% } %>
+                    </div>
                 </div>
-                <div class="product-info">
-                    <h3 class="product-name">Black Waistcoat</h3>
-                    <p class="product-price">Rs. 6,800</p>
-                    <button class="add-to-cart-btn">
-                        <i class="fa-solid fa-cart-shopping"></i> Add to Cart
-                    </button>
-                </div>
-            </div>
-
-            <div class="product-card">
-                <div class="product-image-container">
-                    <img src="/zarar.png" alt="Signature Fragrance" class="product-image">
-                </div>
-                <div class="product-info">
-                    <h3 class="product-name">J. Zarar Eau De Parfum</h3>
-                    <p class="product-price">Rs. 4,800</p>
-                    <button class="add-to-cart-btn">
-                        <i class="fa-solid fa-cart-shopping"></i> Add to Cart
-                    </button>
-                </div>
-            </div>
-
+            <% }) %>
         </div>
     </section>
     <section class="testimonials-section">

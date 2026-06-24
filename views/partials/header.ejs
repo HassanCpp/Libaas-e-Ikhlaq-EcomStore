@@ -12,11 +12,12 @@
     </div>
     
     <div class="header-icons">
-        <form action="/products" method="GET" class="header-search-form d-flex align-items-center m-0" style="position: relative;">
-            <input type="text" name="search" placeholder="Search..." style="border-radius: 20px; padding: 4px 30px 4px 12px; font-size: 13px; max-width: 140px; border: 1px solid #ddd; height: 32px; font-family: 'Montserrat', sans-serif;" value="<%= (locals.query && query.search) ? query.search : '' %>">
+        <form action="/products" method="GET" class="header-search-form d-flex align-items-center m-0" style="position: relative; overflow: visible;">
+            <input type="text" name="search" id="header-search-input" autocomplete="off" placeholder="Search..." style="border-radius: 20px; padding: 4px 30px 4px 12px; font-size: 13px; max-width: 140px; border: 1px solid #ddd; height: 32px; font-family: 'Montserrat', sans-serif;" value="<%= (locals.query && query.search) ? query.search : '' %>">
             <button type="submit" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; padding: 0; color: #333; cursor: pointer; display: flex; align-items: center; justify-content: center;">
                 <i class="fa-solid fa-magnifying-glass" style="font-size: 14px; margin: 0;"></i>
             </button>
+            <div id="search-autocomplete-results" style="display: none; position: absolute; top: 38px; right: 0; width: 280px; background: #fff; border: 1px solid #eee; border-radius: 8px; z-index: 9999; box-shadow: 0 10px 25px rgba(0,0,0,0.1); max-height: 380px; overflow-y: auto;"></div>
         </form>
 
         <a href="/wishlist" class="header-icon-link" title="Wishlist">
@@ -69,5 +70,16 @@
             <% } %>
         </a>
     </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 99999; display: flex; flex-direction: column; gap: 10px; pointer-events: none;"></div>
+
+    <!-- Flash message hooks -->
+    <% if (locals.success_msg && success_msg.length > 0) { %>
+        <div class="flash-toast-hook" data-type="success" data-message="<%= success_msg %>"></div>
+    <% } %>
+    <% if (locals.error_msg && error_msg.length > 0) { %>
+        <div class="flash-toast-hook" data-type="error" data-message="<%= error_msg %>"></div>
+    <% } %>
     
 </header>

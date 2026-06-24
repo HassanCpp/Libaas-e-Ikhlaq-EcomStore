@@ -322,4 +322,25 @@ const submitApiOrder = async (req, res) => {
     }
 };
 
-module.exports = { apiLogin, getApiProducts, getApiProductById, getApiProfile, submitApiOrder };
+// GET Autocomplete search suggestions (AJAX)
+const getSearchAutocomplete = async (req, res) => {
+    try {
+        const { q } = req.query;
+        if (!q || q.trim().length < 2) {
+            return res.json({ success: true, count: 0, data: [] });
+        }
+
+        // Perform case-insensitive partial match
+        const regex = new RegExp(q.trim().replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'i');
+        const products = await Product.find({ name: { $regex: regex } })
+            .limit(5)
+            .select('_id name price discountPrice image category');
+
+        res.json({ success: true, count: products.length, data: products });
+    } catch (err) {
+        console.error('❌ API Search Autocomplete error:', err);
+        res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+};
+
+module.exports = { apiLogin, getApiProducts, getApiProductById, getApiProfile, submitApiOrder, getSearchAutocomplete };

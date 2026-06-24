@@ -23,10 +23,16 @@ router.post('/wishlist/remove', storeController.removeFromWishlist);
 // Newsletter Subscription
 router.post('/newsletter/subscribe', storeController.subscribeNewsletter);
 
+// Developer API Documentation
+router.get('/api-docs', (req, res) => res.render('api-docs'));
+
 // Checkout & Order Actions
 router.get('/checkout', storeController.renderCheckout);
 router.post('/checkout', storeController.processCheckout);
+router.post('/checkout/apply-coupon', storeController.applyCoupon);
+router.post('/checkout/remove-coupon', storeController.removeCoupon);
 router.get('/orders/success/:id', storeController.renderSuccess);
+router.get('/orders/:id/invoice', storeController.downloadInvoice);
 
 // Customer Orders History
 router.get('/orders', isLoggedIn, storeController.getMyOrders);

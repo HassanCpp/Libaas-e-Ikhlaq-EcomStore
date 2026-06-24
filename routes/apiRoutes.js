@@ -9,6 +9,7 @@ const { verifyToken } = require('../middleware/jwtAuth');
 router.post('/auth/login', apiController.apiLogin);
 router.get('/products', apiController.getApiProducts);
 router.get('/products/:id', apiController.getApiProductById);
+router.get('/search-autocomplete', apiController.getSearchAutocomplete);
 
 // --- PROTECTED ROUTES (Requires JWT Passport) ---
 // The verifyToken middleware checks the header before allowing the controller to run

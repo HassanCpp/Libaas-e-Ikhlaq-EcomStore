@@ -264,13 +264,34 @@
                             <span>Subtotal</span>
                             <span>PKR <%= subtotal.toLocaleString() %></span>
                         </div>
+                        <% if (locals.discountAmount && discountAmount > 0) { %>
+                            <div class="checkout-item text-success fw-bold">
+                                <span>Discount (<%= couponApplied.code %>)</span>
+                                <span>-PKR <%= discountAmount.toLocaleString() %></span>
+                            </div>
+                        <% } %>
                         <div class="checkout-item text-muted">
                             <span>Shipping</span>
                             <span>FREE</span>
                         </div>
+                        
+                        <!-- Promo Code Block -->
+                        <div class="mt-3 pt-3 border-top">
+                            <label class="form-label small fw-bold">PROMO CODE</label>
+                            <div class="input-group">
+                                <input type="text" id="coupon-code-input" class="form-control form-control-sm" placeholder="e.g. WELCOME10" style="text-transform: uppercase;" <%= couponApplied ? 'disabled value=' + couponApplied.code : '' %>>
+                                <% if (couponApplied) { %>
+                                    <button class="btn btn-danger btn-sm" type="button" id="remove-coupon-btn">Remove</button>
+                                <% } else { %>
+                                    <button class="btn btn-outline-dark btn-sm" type="button" id="apply-coupon-btn">Apply</button>
+                                <% } %>
+                            </div>
+                            <div id="coupon-message" class="small mt-2" style="display: none;"></div>
+                        </div>
+
                         <div class="summary-total-row">
                             <span>Total</span>
-                            <span>PKR <%= subtotal.toLocaleString() %></span>
+                            <span id="summary-grand-total">PKR <%= totalAmount.toLocaleString() %></span>
                         </div>
 
                         <button type="submit" class="btn-order">
@@ -366,6 +387,96 @@
             }
             cardExpiryMirror.textContent = e.target.value || 'MM/YY';
         });
+
+        // Coupon AJAX Apply and Remove Event Listeners
+        const applyCouponBtn = document.getElementById('apply-coupon-btn');
+        const removeCouponBtn = document.getElementById('remove-coupon-btn');
+        const couponCodeInput = document.getElementById('coupon-code-input');
+        const couponMessage = document.getElementById('coupon-message');
+
+        if (applyCouponBtn) {
+            applyCouponBtn.addEventListener('click', async () => {
+                const code = couponCodeInput.value.trim();
+                if (!code) {
+                    couponMessage.style.display = 'block';
+                    couponMessage.className = 'small mt-2 text-danger';
+                    couponMessage.textContent = 'Please enter a coupon code.';
+                    return;
+                }
+
+                try {
+                    const csrfToken = document.querySelector('input[name="_csrf"]').value;
+                    const response = await fetch('/checkout/apply-coupon', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-Token': csrfToken
+                        },
+                        body: JSON.stringify({ couponCode: code })
+                    });
+                    const result = await response.json();
+
+                    if (result.success) {
+                        couponMessage.style.display = 'block';
+                        couponMessage.className = 'small mt-2 text-success fw-bold';
+                        couponMessage.textContent = result.message;
+
+                        if (window.showToast) {
+                            window.showToast(result.message, 'success');
+                        }
+
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
+                    } else {
+                        couponMessage.style.display = 'block';
+                        couponMessage.className = 'small mt-2 text-danger';
+                        couponMessage.textContent = result.message;
+
+                        if (window.showToast) {
+                            window.showToast(result.message, 'error');
+                        }
+                    }
+                } catch (err) {
+                    console.error('Error applying coupon:', err);
+                    couponMessage.style.display = 'block';
+                    couponMessage.className = 'small mt-2 text-danger';
+                    couponMessage.textContent = 'Server communication error. Please try again.';
+                }
+            });
+        }
+
+        if (removeCouponBtn) {
+            removeCouponBtn.addEventListener('click', async () => {
+                try {
+                    const csrfToken = document.querySelector('input[name="_csrf"]').value;
+                    const response = await fetch('/checkout/remove-coupon', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-Token': csrfToken
+                        }
+                    });
+                    const result = await response.json();
+
+                    if (result.success) {
+                        couponMessage.style.display = 'block';
+                        couponMessage.className = 'small mt-2 text-success';
+                        couponMessage.textContent = result.message;
+
+                        if (window.showToast) {
+                            window.showToast(result.message, 'success');
+                        }
+
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1000);
+                    }
+                } catch (err) {
+                    console.error('Error removing coupon:', err);
+                }
+            });
+        }
     </script>
 </body>
 </html>

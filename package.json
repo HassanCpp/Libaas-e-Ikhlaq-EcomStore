@@ -22,7 +22,8 @@
     "mongo-sanitize": "^1.1.0",
     "mongoose": "^9.6.2",
     "multer": "^2.1.1",
-    "nodemailer": "^9.0.1"
+    "nodemailer": "^9.0.1",
+    "pdfkit": "^0.19.1"
   },
   "devDependencies": {
     "nodemon": "^3.0.2"
