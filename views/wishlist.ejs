@@ -163,12 +163,16 @@
                             </div>
                             
                             <!-- Add to Cart Form -->
-                            <form action="/cart/add" method="POST">
-                                <input type="hidden" name="_csrf" value="<%= csrfToken %>">
-                                <input type="hidden" name="productId" value="<%= item._id %>">
-                                <input type="hidden" name="quantity" value="1">
-                                <button type="submit" class="btn-add-cart-wish">Add To Cart</button>
-                            </form>
+                            <% if (item.category === 'kurta-pajama' || item.category === 'waistcoats') { %>
+                                <a href="/products/<%= item._id %>" class="btn-add-cart-wish">Select Size</a>
+                            <% } else { %>
+                                <form action="/cart/add" method="POST">
+                                    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+                                    <input type="hidden" name="productId" value="<%= item._id %>">
+                                    <input type="hidden" name="quantity" value="1">
+                                    <button type="submit" class="btn-add-cart-wish">Add To Cart</button>
+                                </form>
+                            <% } %>
                         </div>
                     </div>
                 <% }) %>
